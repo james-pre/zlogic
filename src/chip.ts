@@ -92,9 +92,9 @@ export abstract class Chip extends Component {
 	public render() {
 		const ctor = this.constructor as typeof Chip & ComponentStatic;
 
-		return html`<div>
+		return html`
 			<p>${ctor.displayName || ctor.name}</p>
 			${this.pins.toArray()}
-		</div>`;
+		`;
 	}
 }

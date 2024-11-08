@@ -8,16 +8,13 @@ export class Pin extends Component {
 	public static styles = css`
 		:host {
 			display: block;
-			position: relative;
+			position: absolute;
 			border-radius: 50%;
 			width: 1em;
 			height: 1em;
 		}
 	`;
 
-	/**
-	 *
-	 */
 	@property() public accessor state: boolean = false;
 
 	public constructor(
@@ -35,8 +32,14 @@ export class Pin extends Component {
 
 	protected updated(_: Map<PropertyKey, unknown>): void {
 		super.updated(_);
-		this.style.transform = `translate(${this.x}px, ${this.y}px)`;
 		this.style.backgroundColor = this.state ? '#c44' : '#511';
+
+		const pins = this.isInput ? this.chip.inputs : this.chip.outputs;
+		const index = pins.toArray().indexOf(this);
+
+		const chipStyle = getComputedStyle(this.chip);
+
+		this.style.transform = `translate(${this.isInput ? '-0.5em' : `calc(${chipStyle.width} - 0.5em)`}, calc(${(index - (pins.size - 1) / 2) * 20}px - calc(${chipStyle.height} / 2)))`;
 	}
 
 	public Update(): void {
