@@ -5,6 +5,7 @@ import { Pin } from '../pin.js';
 @register
 export class AND extends Chip {
 	public static isBuiltin: boolean = true;
+	public static color = this.randomColor();
 
 	public constructor() {
 		super();

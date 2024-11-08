@@ -2,8 +2,15 @@ import { css, html } from 'lit';
 import { List, randomInt } from 'utilium';
 import { Component, type ComponentStatic } from './component.js';
 import type { Pin } from './pin.js';
+import { property } from 'lit/decorators.js';
 
 export abstract class Chip extends Component {
+	static randomColor(): string {
+		return '#' + randomInt(222, 999);
+	}
+
+	static color = this.randomColor();
+
 	static styles = css`
 		:host {
 			position: absolute;
@@ -24,7 +31,7 @@ export abstract class Chip extends Component {
 
 	public pins = new List<Pin>();
 
-	public color: string = '#' + randomInt(10 ** 6);
+	@property() public accessor color: string = (this.constructor as typeof Chip).color;
 
 	public get inputs(): List<Pin> {
 		return new List(this.pins.toArray().filter(pin => pin.isInput));

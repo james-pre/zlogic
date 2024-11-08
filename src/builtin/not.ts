@@ -5,6 +5,7 @@ import { Pin } from '../pin.js';
 @register
 export class NOT extends Chip {
 	public static isBuiltin: boolean = true;
+	public static color = this.randomColor();
 
 	public input = new Pin(this, true);
 	public output = new Pin(this, false);
