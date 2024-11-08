@@ -1,4 +1,4 @@
-import { css, html } from 'lit';
+import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { Chip } from './chip.js';
 import { Component } from './component.js';
@@ -7,7 +7,11 @@ import { Component } from './component.js';
 export class Pin extends Component {
 	public static styles = css`
 		:host {
-			border-radius: 25%;
+			display: block;
+			position: relative;
+			border-radius: 50%;
+			width: 1em;
+			height: 1em;
 		}
 	`;
 
@@ -22,12 +26,17 @@ export class Pin extends Component {
 	) {
 		super();
 		chip.pins.add(this);
-		chip.append(this);
 	}
 
 	public set(state: boolean): void {
 		this.state = state;
 		this.Update();
+	}
+
+	protected updated(_: Map<PropertyKey, unknown>): void {
+		super.updated(_);
+		this.style.transform = `translate(${this.x}px, ${this.y}px)`;
+		this.style.backgroundColor = this.state ? '#c44' : '#511';
 	}
 
 	public Update(): void {

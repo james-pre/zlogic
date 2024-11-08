@@ -1,6 +1,6 @@
-import { css } from 'lit';
-import { List, randomHex } from 'utilium';
-import { Component } from './component.js';
+import { css, html } from 'lit';
+import { List, randomInt } from 'utilium';
+import { Component, type ComponentStatic } from './component.js';
 import type { Pin } from './pin.js';
 
 export abstract class Chip extends Component {
@@ -10,16 +10,21 @@ export abstract class Chip extends Component {
 			cursor: grab;
 			min-width: 1em;
 			min-height: 1em;
+			border-radius: 0.25em;
 		}
 
 		:host([dragging]) {
 			cursor: grabbing;
 		}
+
+		p {
+			margin: 1em;
+		}
 	`;
 
 	public pins = new List<Pin>();
 
-	public color: string = '#' + randomHex(6);
+	public color: string = '#' + randomInt(10 ** 6);
 
 	public get inputs(): List<Pin> {
 		return new List(this.pins.toArray().filter(pin => pin.isInput));
@@ -31,7 +36,7 @@ export abstract class Chip extends Component {
 
 	protected updated(_: Map<PropertyKey, unknown>): void {
 		super.updated(_);
-		this.style.backgroundColor = this.color;
+		this.style.transform = `translate(${this.x}px, ${this.y}px)`;
 	}
 
 	public Update(): void {}
@@ -69,6 +74,7 @@ export abstract class Chip extends Component {
 	public connectedCallback() {
 		super.connectedCallback();
 		this.classList.add('component');
+		this.style.backgroundColor = this.color;
 		if (!this.canMove) return;
 		this.addEventListener('mousedown', this.onMouseDown);
 		this.addEventListener('mousemove', this.onMouseMove);
@@ -81,5 +87,14 @@ export abstract class Chip extends Component {
 		this.removeEventListener('mousedown', this.onMouseDown);
 		this.removeEventListener('mousemove', this.onMouseMove);
 		this.removeEventListener('mouseup', this.onMouseUp);
+	}
+
+	public render() {
+		const ctor = this.constructor as typeof Chip & ComponentStatic;
+
+		return html`<div>
+			<p>${ctor.displayName || ctor.name}</p>
+			${this.pins.toArray()}
+		</div>`;
 	}
 }
