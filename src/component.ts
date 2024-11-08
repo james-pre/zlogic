@@ -2,8 +2,16 @@ import $ from 'jquery';
 import { html, LitElement, type CSSResult } from 'lit';
 import { property } from 'lit/decorators.js';
 import { randomID } from './utils.js';
+import { pick } from 'utilium';
 
 export type ComponentStyles = CSSResult | ComponentStyles[];
+
+export interface ComponentJSON {
+	id: string;
+	x: number;
+	y: number;
+	name: string;
+}
 
 export abstract class Component extends LitElement {
 	/**
@@ -23,6 +31,10 @@ export abstract class Component extends LitElement {
 
 	public render() {
 		return html`<div></div>`;
+	}
+
+	public toJSON(): ComponentJSON {
+		return pick(this, 'id', 'x', 'y', 'name');
 	}
 }
 
