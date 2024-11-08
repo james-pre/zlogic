@@ -1,18 +1,21 @@
-import { css, html } from 'lit';
+import { css } from 'lit';
 import { List, randomHex } from 'utilium';
 import { Component } from './component.js';
 import type { Pin } from './pin.js';
 
 export abstract class Chip extends Component {
-	static styles = [
-		Component.styles,
-		css`
-			:host {
-				min-width: 1em;
-				min-height: 1em;
-			}
-		`,
-	];
+	static styles = css`
+		:host {
+			position: absolute;
+			cursor: grab;
+			min-width: 1em;
+			min-height: 1em;
+		}
+
+		:host([dragging]) {
+			cursor: grabbing;
+		}
+	`;
 
 	public pins = new List<Pin>();
 
@@ -33,7 +36,50 @@ export abstract class Chip extends Component {
 
 	public Update(): void {}
 
-	public render() {
-		return html`<div></div>`;
+	private dragging = false;
+	private offsetX = 0;
+	private offsetY = 0;
+
+	protected canMove: boolean = true;
+
+	private onMouseDown = (event: MouseEvent) => {
+		this.dragging = true;
+		this.offsetX = event.clientX - this.x;
+		this.offsetY = event.clientY - this.y;
+		this.setAttribute('dragging', '');
+		document.addEventListener('mousemove', this.onMouseMove);
+		document.addEventListener('mouseup', this.onMouseUp);
+	};
+
+	private onMouseMove = (event: MouseEvent) => {
+		if (!this.dragging) return;
+
+		this.x = event.clientX - this.offsetX;
+		this.y = event.clientY - this.offsetY;
+		this.style.transform = `translate(${this.x}px, ${this.y}px)`;
+	};
+
+	private onMouseUp = () => {
+		if (!this.dragging) return;
+
+		this.dragging = false;
+		this.removeAttribute('dragging');
+	};
+
+	public connectedCallback() {
+		super.connectedCallback();
+		this.classList.add('component');
+		if (!this.canMove) return;
+		this.addEventListener('mousedown', this.onMouseDown);
+		this.addEventListener('mousemove', this.onMouseMove);
+		this.addEventListener('mouseup', this.onMouseUp);
+	}
+
+	public disconnectedCallback() {
+		super.disconnectedCallback();
+		if (!this.canMove) return;
+		this.removeEventListener('mousedown', this.onMouseDown);
+		this.removeEventListener('mousemove', this.onMouseMove);
+		this.removeEventListener('mouseup', this.onMouseUp);
 	}
 }

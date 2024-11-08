@@ -1,10 +1,16 @@
-import { html } from 'lit';
+import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { Chip } from './chip.js';
 import { Component } from './component.js';
 
 @customElement('sim-pin')
 export class Pin extends Component {
+	public static styles = css`
+		:host {
+			border-radius: 25%;
+		}
+	`;
+
 	/**
 	 *
 	 */
@@ -16,6 +22,7 @@ export class Pin extends Component {
 	) {
 		super();
 		chip.pins.add(this);
+		chip.append(this);
 	}
 
 	public set(state: boolean): void {
@@ -25,15 +32,5 @@ export class Pin extends Component {
 
 	public Update(): void {
 		this.chip.Update();
-	}
-
-	public render() {
-		return html`<circle cx="0" cy="0" r="1" fill=${this.state ? '#c44' : '#511'} />`;
-	}
-}
-
-declare global {
-	interface HTMLElementTagNameMap {
-		'sim-pin': Pin;
 	}
 }

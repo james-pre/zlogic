@@ -6,6 +6,12 @@ import { Pin } from '../pin.js';
 export class AND extends Chip {
 	public static isBuiltin: boolean = true;
 
+	public constructor() {
+		super();
+		new Pin(this, true);
+		new Pin(this, true);
+	}
+
 	protected output = new Pin(this, false);
 
 	public Update(): void {
