@@ -69,8 +69,10 @@ input[type='button']:hover {
 	background-color: #666;
 }
 
-input {
-	box-shadow: var(--bg-shadow);
+input,
+select {
+	box-shadow: none;
+	border: 1px solid #555;
 	border-radius: var(--bg-radius);
 }
 
