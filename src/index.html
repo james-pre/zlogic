@@ -4,21 +4,31 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Logic Simulator</title>
-		<link rel="stylesheet" href="./styles.css" />
 	</head>
 	<body>
 		<div id="menu">
+			<h1>Logic Simulator</h1>
 			<button class="new">New</button>
 			<button class="load">Load</button>
 			<button class="save">Save</button>
 		</div>
 
-		<div id="editor-container" tabindex="-1">
+		<div id="editor-container" tabindex="-1" style="display: none">
+			<div class="toolbar">
+				<select class="add">
+					<option value="" selected hidden>Add</option>
+				</select>
+			</div>
 			<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRation="none" id="editor" transform-origin="center">
 				<g style="transition: 0.25s ease-out allow-discrete"></g>
 			</svg>
 		</div>
 
-		<script src="browser.min.js"></script>
+		<dialog id="alert">
+			<p class="text"></p>
+			<button>Okay</button>
+		</dialog>
+
+		<script type="module" src="index.ts"></script>
 	</body>
 </html>

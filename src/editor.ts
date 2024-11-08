@@ -1,4 +1,9 @@
 import $ from 'jquery';
+import { components } from './component.js';
+import { alert } from './utils.js';
+
+export const element = $('#editor'),
+	container = $('#editor-container');
 
 export const config = {
 	max_size: 1000,
@@ -18,7 +23,7 @@ export function svgY(): number {
 }
 
 export function update(): void {
-	$('#editor>g').css({
+	element.find('>g').css({
 		translate: `${svgX()}px ${svgY()}px`,
 		rotate: rotation + 'rad',
 		scale,
@@ -27,7 +32,12 @@ export function update(): void {
 
 export function clear(): void {}
 
-$('#editor').on('keydown', e => {
+export function open(): void {
+	$('#menu').hide();
+	container.show();
+}
+
+element.on('keydown', e => {
 	const speed = e.shiftKey ? 100 : 10,
 		max = config.max_size / 2;
 	switch (e.key) {
@@ -51,8 +61,20 @@ $('#editor').on('keydown', e => {
 	update();
 });
 
-$('#editor').on('wheel', ({ originalEvent }: JQuery.TriggeredEvent) => {
+element.on('wheel', ({ originalEvent }: JQuery.TriggeredEvent) => {
 	const original = originalEvent as WheelEvent;
 	scale = Math.min(Math.max(scale - Math.sign(original.deltaY) * 0.1, 0.5), 5);
 	update();
+});
+
+const add = container.find<HTMLSelectElement>('select.add');
+add.on('change', e => {
+	console.log('change');
+	const component = components.get(e.target.value);
+	if (!component) {
+		void alert('Component does not exist');
+		return;
+	}
+
+	e.target.value = '';
 });

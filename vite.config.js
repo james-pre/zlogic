@@ -8,4 +8,7 @@ export default defineConfig({
 		emptyOutDir: true,
 		target: 'esnext',
 	},
+	esbuild: {
+		target: 'es2022',
+	},
 });

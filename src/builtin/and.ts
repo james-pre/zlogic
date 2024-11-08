@@ -1,23 +1,22 @@
 import { Chip } from '../chip.js';
+import { register } from '../component.js';
 import { Pin } from '../pin.js';
 
-export class Bus extends Chip {
+@register
+export class AND extends Chip {
 	public isBuiltin: boolean = true;
+
+	protected output = new Pin(this, false);
 
 	public constructor(inputs: number) {
 		super();
 
 		for (let i = 0; i < inputs; i++) {
 			new Pin(this, true);
-			new Pin(this, false);
 		}
 	}
 
 	public update(): void {
-		const { inputs, outputs } = this;
-
-		for (let i = 0; i < inputs.size; i++) {
-			outputs.at(i).set(inputs.at(i).state);
-		}
+		this.output.set(this.inputs.toArray().every(pin => pin.state));
 	}
 }

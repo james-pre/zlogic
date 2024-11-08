@@ -1,0 +1,17 @@
+#menu {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 1em;
+	align-items: center;
+
+	button {
+		width: 300px;
+	}
+}
+
+#editor-container {
+	position: fixed;
+	width: 100%;
+	height: 100%;
+}

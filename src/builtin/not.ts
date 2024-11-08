@@ -1,6 +1,8 @@
 import { Chip } from '../chip.js';
+import { register } from '../component.js';
 import { Pin } from '../pin.js';
 
+@register
 export class NOT extends Chip {
 	public isBuiltin: boolean = true;
 
