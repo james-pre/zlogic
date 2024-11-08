@@ -20,15 +20,15 @@ export class Pin extends Component {
 
 	public set(state: boolean): void {
 		this.state = state;
-		this.update();
+		this.Update();
 	}
 
-	public update(): void {
-		this.chip.update();
+	public Update(): void {
+		this.chip.Update();
 	}
 
 	public render() {
-		return html`<circle cx="0" cy="0" r="1" fill="#f00" />`;
+		return html`<circle cx="0" cy="0" r="1" fill=${this.state ? '#c44' : '#511'} />`;
 	}
 }
 

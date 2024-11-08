@@ -4,22 +4,12 @@ import { Pin } from '../pin.js';
 
 @register
 export class Bus extends Chip {
-	public isBuiltin: boolean = true;
+	public static isBuiltin: boolean = true;
 
-	public constructor(inputs: number) {
-		super();
+	public input = new Pin(this, true);
+	public output = new Pin(this, false);
 
-		for (let i = 0; i < inputs; i++) {
-			new Pin(this, true);
-			new Pin(this, false);
-		}
-	}
-
-	public update(): void {
-		const { inputs, outputs } = this;
-
-		for (let i = 0; i < inputs.size; i++) {
-			outputs.at(i).set(inputs.at(i).state);
-		}
+	public Update(): void {
+		this.output.set(this.input.state);
 	}
 }

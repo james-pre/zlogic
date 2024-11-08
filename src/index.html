@@ -16,12 +16,12 @@
 		<div id="editor-container" tabindex="-1" style="display: none">
 			<div class="toolbar">
 				<select class="add">
-					<option value="" selected hidden>Add</option>
+					<option value="" selected hidden>Add Component</option>
+					<optgroup class="builtin" label="Built-in"></optgroup>
+					<optgroup class="project" label="Project"></optgroup>
 				</select>
 			</div>
-			<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRation="none" id="editor" transform-origin="center">
-				<g style="transition: 0.25s ease-out allow-discrete"></g>
-			</svg>
+			<div id="editor"></div>
 		</div>
 
 		<dialog id="alert">

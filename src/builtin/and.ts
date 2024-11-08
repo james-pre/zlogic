@@ -4,19 +4,11 @@ import { Pin } from '../pin.js';
 
 @register
 export class AND extends Chip {
-	public isBuiltin: boolean = true;
+	public static isBuiltin: boolean = true;
 
 	protected output = new Pin(this, false);
 
-	public constructor(inputs: number) {
-		super();
-
-		for (let i = 0; i < inputs; i++) {
-			new Pin(this, true);
-		}
-	}
-
-	public update(): void {
+	public Update(): void {
 		this.output.set(this.inputs.toArray().every(pin => pin.state));
 	}
 }
