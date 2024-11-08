@@ -1,7 +1,6 @@
-import tseslint from 'typescript-eslint';
 import eslint from '@eslint/js';
-import stylistic from '@stylistic/eslint-plugin';
 import globals from 'globals';
+import tseslint from 'typescript-eslint';
 
 export default tseslint.config({
 	name: 'logic-sim',
@@ -16,12 +15,9 @@ export default tseslint.config({
 			tsconfigRootDir: import.meta.dirname,
 		},
 	},
-	plugins: { stylistic },
 	rules: {
 		'no-useless-escape': 'warn',
-		'stylistic/no-mixed-spaces-and-tabs': 'warn',
 		'no-unreachable': 'warn',
-		'stylistic/no-extra-semi': 'warn',
 		'no-fallthrough': 'warn',
 		'no-empty': 'warn',
 		'no-case-declarations': 'warn',

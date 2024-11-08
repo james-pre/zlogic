@@ -3,11 +3,11 @@
 		"module": "NodeNext",
 		"target": "ES2020",
 		"outDir": "dist",
-		"lib": ["ESNext", "ESNext.Disposable"],
+		"lib": ["ESNext", "ESNext.Disposable", "DOM"],
 		"moduleResolution": "NodeNext",
 		"declaration": true,
 		"strict": true
 	},
-	"include": ["src/**/*.ts"],
+	"include": ["src/**/*.ts", "src"],
 	"exclude": ["node_modules"]
 }
