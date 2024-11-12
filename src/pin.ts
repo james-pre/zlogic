@@ -36,6 +36,11 @@ export class Pin extends Component {
 		super();
 		chip.pins.add(this);
 		this.canMove = isTop;
+
+		this.addEventListener('click', (e: MouseEvent) => {
+			connectWire(this);
+			e.stopPropagation();
+		});
 	}
 
 	public set(state: boolean): void {
@@ -87,17 +92,11 @@ export class Pin extends Component {
 		}
 	}
 
-	private onClick = (e: Event) => {
-		connectWire(this);
-		e.stopPropagation();
-	};
-	public connectedCallback(): void {
-		super.connectedCallback();
-		this.addEventListener('click', this.onClick);
-	}
-
-	public disconnectedCallback(): void {
-		super.disconnectedCallback();
-		this.removeEventListener('click', this.onClick);
+	public remove(): void {
+		super.remove();
+		this.chip.pins.delete(this);
+		for (const wire of this.wires) {
+			wire.remove();
+		}
 	}
 }

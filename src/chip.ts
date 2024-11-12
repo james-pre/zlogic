@@ -1,9 +1,12 @@
+import $ from 'jquery';
 import { css, html } from 'lit';
 import { List, randomInt } from 'utilium';
-import { Component, type ComponentStatic } from './component.js';
+import { Component } from './component.js';
 import type { Pin } from './pin.js';
 
 export abstract class Chip extends Component {
+	declare ['constructor']: ChipMetadata & typeof Chip;
+
 	static randomColor(): string {
 		return '#' + randomInt(222, 999);
 	}
@@ -13,7 +16,6 @@ export abstract class Chip extends Component {
 	static styles = css`
 		:host {
 			position: absolute;
-			cursor: grab;
 			min-width: 1em;
 			min-height: 1em;
 			border-radius: 0.25em;
@@ -38,6 +40,12 @@ export abstract class Chip extends Component {
 		return new List(this.pins.toArray().filter(pin => !pin.isInput));
 	}
 
+	public constructor() {
+		super();
+		this.canMove = true;
+		this.style.backgroundColor = this.constructor.color;
+	}
+
 	protected updated(_: Map<PropertyKey, unknown>): void {
 		super.updated(_);
 		this.style.transform = `translate(${this.x}px, ${this.y}px)`;
@@ -48,18 +56,44 @@ export abstract class Chip extends Component {
 
 	public abstract Update(): void;
 
-	public connectedCallback(): void {
-		this.canMove = true;
-		super.connectedCallback();
-		this.style.backgroundColor = (this.constructor as typeof Chip).color;
+	public remove(): void {
+		super.remove();
+		for (const pin of this.pins) {
+			pin.remove();
+		}
 	}
 
 	public render() {
-		const ctor = this.constructor as typeof Chip & ComponentStatic;
+		const ctor = this.constructor;
 
 		return html`
-			<p>${ctor.displayName || ctor.name}</p>
+			<p>${ctor.display || ctor.name}</p>
 			${this.pins.toArray()}
 		`;
 	}
+}
+
+export interface ChipMetadata {
+	id: string;
+	display: string;
+	builtin: boolean;
+}
+
+export type ChipLike = new () => Chip;
+
+export const chips = new Map<string, ChipLike>();
+
+export function register({ id, display, builtin = false }: Partial<ChipMetadata>) {
+	return function <T extends ChipLike>(target: T): T & ChipMetadata {
+		id ||= target.name.toLowerCase();
+		display ||= target.name;
+		customElements.define('sim-chip-' + id.replaceAll(':', '-'), target);
+		chips.set(id, target);
+		$('<option />')
+			.val(id)
+			.text(display)
+			.appendTo('optgroup.' + (builtin ? 'builtin' : 'project'));
+
+		return Object.assign(target, { id, display, builtin });
+	};
 }

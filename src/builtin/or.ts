@@ -1,10 +1,8 @@
-import { Chip } from '../chip.js';
-import { register } from '../component.js';
+import { Chip, register } from '../chip.js';
 import { Pin } from '../pin.js';
 
-@register
+@register({ builtin: true })
 export class OR extends Chip {
-	public static isBuiltin: boolean = true;
 	public static color = this.randomColor();
 
 	public constructor() {

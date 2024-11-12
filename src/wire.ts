@@ -6,12 +6,9 @@ import { colorState } from './utils.js';
 
 @customElement('sim-anchor')
 export class WireAnchor extends Component {
-	public Update(): void {}
+	protected canMove = true;
 
-	public connectedCallback(): void {
-		this.canMove = true;
-		super.connectedCallback();
-	}
+	public Update(): void {}
 }
 
 @customElement('sim-wire')
@@ -48,6 +45,12 @@ export class Wire extends Component {
 	public Update(): void {
 		this.output?.set(this.input.state);
 		this.requestUpdate();
+	}
+
+	public remove(): void {
+		super.remove();
+		this.input.wires.delete(this);
+		this.output?.wires.delete(this);
 	}
 
 	public addAnchor(x: number, y: number): void {

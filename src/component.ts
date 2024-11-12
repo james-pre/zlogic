@@ -6,13 +6,6 @@ import { randomID } from './utils.js';
 
 export type ComponentStyles = CSSResult | ComponentStyles[];
 
-export interface ComponentJSON {
-	id: string;
-	x: number;
-	y: number;
-	name: string;
-}
-
 export abstract class Component extends LitElement {
 	/**
 	 * User-facing name of the component
@@ -33,10 +26,6 @@ export abstract class Component extends LitElement {
 		return html`<div></div>`;
 	}
 
-	public toJSON(): ComponentJSON {
-		return pick(this, 'id', 'x', 'y', 'name');
-	}
-
 	public remove(): void {
 		super.remove();
 		this.dispatchEvent(new Event('removed'));
@@ -51,7 +40,22 @@ export abstract class Component extends LitElement {
 
 	protected canMove: boolean = false;
 
+	public constructor() {
+		super();
+		this.classList.add('component');
+		this.addEventListener('click', (e: MouseEvent) => {
+			if (e.button == 1) {
+				this.remove();
+			}
+		});
+
+		this.addEventListener('mousedown', this.onMouseDown);
+		this.addEventListener('mousemove', this.onMouseMove);
+		this.addEventListener('mouseup', this.onMouseUp);
+	}
+
 	private onMouseDown = (event: MouseEvent) => {
+		if (!this.canMove) return;
 		this.dragging = true;
 		this.offsetX = event.clientX - this.x;
 		this.offsetY = event.clientY - this.y;
@@ -61,7 +65,7 @@ export abstract class Component extends LitElement {
 	};
 
 	private onMouseMove = (event: MouseEvent) => {
-		if (!this.dragging) return;
+		if (!this.canMove || !this.dragging) return;
 
 		const newX = event.clientX - this.offsetX;
 		const newY = event.clientY - this.offsetY;
@@ -71,45 +75,18 @@ export abstract class Component extends LitElement {
 	};
 
 	private onMouseUp = () => {
-		if (!this.dragging) return;
+		if (!this.canMove || !this.dragging) return;
 
 		this.dragging = false;
 		this.isMoved = false;
 		this.removeAttribute('dragging');
+		document.removeEventListener('mousemove', this.onMouseMove);
+		document.removeEventListener('mouseup', this.onMouseUp);
 	};
-
-	public connectedCallback() {
-		super.connectedCallback();
-		this.classList.add('component');
-		if (!this.canMove) return;
-		this.addEventListener('mousedown', this.onMouseDown);
-		this.addEventListener('mousemove', this.onMouseMove);
-		this.addEventListener('mouseup', this.onMouseUp);
-	}
 
 	public disconnectedCallback() {
 		super.disconnectedCallback();
-		if (!this.canMove) return;
-		this.removeEventListener('mousedown', this.onMouseDown);
-		this.removeEventListener('mousemove', this.onMouseMove);
-		this.removeEventListener('mouseup', this.onMouseUp);
+		document.removeEventListener('mousemove', this.onMouseMove);
+		document.removeEventListener('mouseup', this.onMouseUp);
 	}
-}
-
-export interface ComponentStatic {
-	displayName?: string;
-	isBuiltin?: boolean;
-}
-
-export type ComponentLike = ComponentStatic & (new () => Component);
-
-export const components = new Map<string, ComponentLike>();
-
-export function register(target: ComponentLike) {
-	customElements.define('sim-' + target.name.toLowerCase(), target);
-	components.set(target.name, target);
-	$('<option />')
-		.val(target.name)
-		.text(target.displayName || target.name)
-		.appendTo('optgroup.' + (target.isBuiltin ? 'builtin' : 'project'));
 }
