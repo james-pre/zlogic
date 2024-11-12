@@ -37,7 +37,7 @@
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"lint": "tsc -p tsconfig.json --noEmit && eslint src",
-		"build": "node scripts/build.js --entry src/index.ts",
+		"build": "vite build",
 		"dev": "npm run build -- --watch",
 		"prepublishOnly": "npm run build"
 	},
