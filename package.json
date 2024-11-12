@@ -37,9 +37,7 @@
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"lint": "tsc -p tsconfig.json --noEmit && eslint src",
-		"build": "vite build",
-		"dev": "npm run build -- --watch",
-		"prepublishOnly": "npm run build"
+		"prepublishOnly": "vite build"
 	},
 	"lint-staged": {
 		"*": [
