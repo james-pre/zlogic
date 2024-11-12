@@ -1,11 +1,11 @@
 import $ from 'jquery';
 import { List } from 'utilium';
 import { download } from 'utilium/dom.js';
-import { Input } from './builtin/io.js';
+import { Input } from './builtin/index.js'; // Need side-effects
 import { Chip, chips as chipConstructors } from './chip.js';
 import type { ChipData, ChipFile, EditorState } from './definitions.js';
 import type { Pin } from './pin.js';
-import { alert } from './utils.js';
+import { popup } from './utils.js';
 import { Wire } from './wire.js';
 
 export const element = $('#editor'),
@@ -31,7 +31,7 @@ toolbar.find<HTMLSelectElement>('select.add').on('change', e => {
 
 	const ChipCtor = chipConstructors.get(e.target.value);
 	if (!ChipCtor) {
-		void alert('Component does not exist');
+		void popup(false, 'Component does not exist');
 		return;
 	}
 

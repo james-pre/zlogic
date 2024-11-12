@@ -4,17 +4,17 @@ export function randomID(): string {
 	return crypto.randomUUID();
 }
 
-const alert_ = $<HTMLDialogElement>('#alert');
-export function alert(text: string): Promise<void> {
-	const { promise, resolve } = Promise.withResolvers<void>();
+const popup_ = $<HTMLDialogElement>('#popup');
+export function popup(isPrompt: boolean, contents: string): Promise<string | undefined> {
+	const { promise, resolve } = Promise.withResolvers<string | undefined>();
 
-	alert_.find('p').text(text);
+	popup_.find('.contents')[isPrompt ? 'html' : 'text'](contents);
 
-	alert_[0].showModal();
+	popup_[0].showModal();
 
-	alert_.find('button').on('click', () => {
-		alert_[0].close();
-		resolve();
+	popup_.find('button').on('click', () => {
+		popup_[0].close();
+		resolve(popup_.find('input').val());
 	});
 
 	return promise;
