@@ -46,7 +46,7 @@ export abstract class Chip extends Component {
 		this.style.transform = `translate(${this.x}px, ${this.y}px)`;
 	}
 
-	public Update(): void {}
+	public simUpdate(): void {}
 
 	private dragging = false;
 	private offsetX = 0;

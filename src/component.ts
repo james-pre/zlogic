@@ -27,7 +27,7 @@ export abstract class Component extends LitElement {
 	/**
 	 * Upper case because lit is dumb
 	 */
-	abstract Update(): void;
+	abstract simUpdate(): void;
 
 	public render() {
 		return html`<div></div>`;
@@ -35,6 +35,11 @@ export abstract class Component extends LitElement {
 
 	public toJSON(): ComponentJSON {
 		return pick(this, 'id', 'x', 'y', 'name');
+	}
+
+	public remove(): void {
+		super.remove();
+		this.dispatchEvent(new Event('removed'));
 	}
 }
 

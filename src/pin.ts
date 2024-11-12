@@ -2,6 +2,8 @@ import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { Chip } from './chip.js';
 import { Component } from './component.js';
+import { connectWire, element } from './editor.js';
+import type { Wire } from './wire.js';
 
 @customElement('sim-pin')
 export class Pin extends Component {
@@ -17,6 +19,8 @@ export class Pin extends Component {
 
 	@property() public accessor state: boolean = false;
 
+	public wires = new Set<Wire>();
+
 	public constructor(
 		public chip: Chip,
 		public isInput: boolean
@@ -27,22 +31,51 @@ export class Pin extends Component {
 
 	public set(state: boolean): void {
 		this.state = state;
-		this.Update();
+		this.simUpdate();
+	}
+
+	public offsets() {
+		const { left, top } = element.offset()!;
+		const { x, y, width, height } = this.getBoundingClientRect();
+
+		return {
+			x: x - left + width / 2,
+			y: y - top + height / 2,
+		};
 	}
 
 	protected updated(_: Map<PropertyKey, unknown>): void {
 		super.updated(_);
 		this.style.backgroundColor = this.state ? '#c44' : '#511';
 
+		const chipStyle = getComputedStyle(this.chip);
+
 		const pins = this.isInput ? this.chip.inputs : this.chip.outputs;
 		const index = pins.toArray().indexOf(this);
 
-		const chipStyle = getComputedStyle(this.chip);
+		const x = this.isInput ? '-0.5em' : `calc(${chipStyle.width} - 0.5em)`,
+			y = `calc(${(index - (pins.size - 1) / 2) * 20}px - calc(${chipStyle.height} / 2))`;
 
-		this.style.transform = `translate(${this.isInput ? '-0.5em' : `calc(${chipStyle.width} - 0.5em)`}, calc(${(index - (pins.size - 1) / 2) * 20}px - calc(${chipStyle.height} / 2)))`;
+		this.style.transform = `translate(${x}, ${y})`;
 	}
 
-	public Update(): void {
-		this.chip.Update();
+	public simUpdate(): void {
+		for (const wire of this.wires) {
+			wire.simUpdate();
+		}
+	}
+
+	private onClick = (e: Event) => {
+		connectWire(this);
+		e.stopPropagation();
+	};
+	public connectedCallback(): void {
+		super.connectedCallback();
+		this.addEventListener('click', this.onClick);
+	}
+
+	public disconnectedCallback(): void {
+		super.disconnectedCallback();
+		this.removeEventListener('click', this.onClick);
 	}
 }

@@ -15,7 +15,7 @@ export class AND extends Chip {
 
 	protected output = new Pin(this, false);
 
-	public Update(): void {
+	public simUpdate(): void {
 		this.output.set(this.inputs.toArray().every(pin => pin.state));
 	}
 }

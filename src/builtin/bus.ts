@@ -10,7 +10,7 @@ export class Bus extends Chip {
 	public input = new Pin(this, true);
 	public output = new Pin(this, false);
 
-	public Update(): void {
+	public simUpdate(): void {
 		this.output.set(this.input.state);
 	}
 }
