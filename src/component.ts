@@ -41,6 +41,53 @@ export abstract class Component extends LitElement {
 		super.remove();
 		this.dispatchEvent(new Event('removed'));
 	}
+
+	// Moving
+	private dragging = false;
+	private offsetX = 0;
+	private offsetY = 0;
+
+	protected canMove: boolean = false;
+
+	private onMouseDown = (event: MouseEvent) => {
+		this.dragging = true;
+		this.offsetX = event.clientX - this.x;
+		this.offsetY = event.clientY - this.y;
+		this.setAttribute('dragging', '');
+		document.addEventListener('mousemove', this.onMouseMove);
+		document.addEventListener('mouseup', this.onMouseUp);
+	};
+
+	private onMouseMove = (event: MouseEvent) => {
+		if (!this.dragging) return;
+
+		this.x = event.clientX - this.offsetX;
+		this.y = event.clientY - this.offsetY;
+	};
+
+	private onMouseUp = () => {
+		if (!this.dragging) return;
+
+		this.dragging = false;
+		this.removeAttribute('dragging');
+	};
+
+	public connectedCallback() {
+		super.connectedCallback();
+		this.classList.add('component');
+		if (!this.canMove) return;
+		this.addEventListener('mousedown', this.onMouseDown);
+		this.addEventListener('mousemove', this.onMouseMove);
+		this.addEventListener('mouseup', this.onMouseUp);
+	}
+
+	public disconnectedCallback() {
+		super.disconnectedCallback();
+		if (!this.canMove) return;
+		this.removeEventListener('mousedown', this.onMouseDown);
+		this.removeEventListener('mousemove', this.onMouseMove);
+		this.removeEventListener('mouseup', this.onMouseUp);
+	}
 }
 
 export interface ComponentStatic {

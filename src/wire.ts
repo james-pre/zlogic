@@ -6,6 +6,11 @@ import type { Pin } from './pin.js';
 @customElement('sim-anchor')
 export class WireAnchor extends Component {
 	public simUpdate(): void {}
+
+	public connectedCallback(): void {
+		this.canMove = true;
+		super.connectedCallback();
+	}
 }
 
 @customElement('sim-wire')

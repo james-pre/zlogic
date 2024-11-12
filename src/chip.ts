@@ -46,56 +46,16 @@ export abstract class Chip extends Component {
 		this.style.transform = `translate(${this.x}px, ${this.y}px)`;
 	}
 
-	public simUpdate(): void {}
-
-	private dragging = false;
-	private offsetX = 0;
-	private offsetY = 0;
-
-	protected canMove: boolean = true;
-
-	private onMouseDown = (event: MouseEvent) => {
-		this.dragging = true;
-		this.offsetX = event.clientX - this.x;
-		this.offsetY = event.clientY - this.y;
-		this.setAttribute('dragging', '');
-		document.addEventListener('mousemove', this.onMouseMove);
-		document.addEventListener('mouseup', this.onMouseUp);
-	};
-
-	private onMouseMove = (event: MouseEvent) => {
-		if (!this.dragging) return;
-
-		this.x = event.clientX - this.offsetX;
-		this.y = event.clientY - this.offsetY;
+	public simUpdate(): void {
 		for (const pin of this.pins) {
 			pin.requestUpdate();
 		}
-	};
-
-	private onMouseUp = () => {
-		if (!this.dragging) return;
-
-		this.dragging = false;
-		this.removeAttribute('dragging');
-	};
-
-	public connectedCallback() {
-		super.connectedCallback();
-		this.classList.add('component');
-		this.style.backgroundColor = this.color;
-		if (!this.canMove) return;
-		this.addEventListener('mousedown', this.onMouseDown);
-		this.addEventListener('mousemove', this.onMouseMove);
-		this.addEventListener('mouseup', this.onMouseUp);
 	}
 
-	public disconnectedCallback() {
-		super.disconnectedCallback();
-		if (!this.canMove) return;
-		this.removeEventListener('mousedown', this.onMouseDown);
-		this.removeEventListener('mousemove', this.onMouseMove);
-		this.removeEventListener('mouseup', this.onMouseUp);
+	public connectedCallback(): void {
+		this.canMove = true;
+		super.connectedCallback();
+		this.style.backgroundColor = this.color;
 	}
 
 	public render() {

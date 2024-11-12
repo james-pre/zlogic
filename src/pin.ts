@@ -23,10 +23,18 @@ export class Pin extends Component {
 
 	public constructor(
 		public chip: Chip,
-		public isInput: boolean
+		/**
+		 * Whether this pin is input for the chip
+		 */
+		public isInput: boolean,
+		/**
+		 * Whether this pin is at the top level (i.e. i/o for the chip being edited)
+		 */
+		public isTop: boolean = false
 	) {
 		super();
 		chip.pins.add(this);
+		this.canMove = isTop;
 	}
 
 	public set(state: boolean): void {
