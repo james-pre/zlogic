@@ -10,7 +10,7 @@ export class NOT extends Chip {
 	public input = new Pin(this, true);
 	public output = new Pin(this, false);
 
-	public simUpdate(): void {
+	public Update(): void {
 		this.output.set(!this.input.state);
 	}
 }

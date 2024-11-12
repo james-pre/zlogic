@@ -5,7 +5,7 @@ import type { Pin } from './pin.js';
 
 @customElement('sim-anchor')
 export class WireAnchor extends Component {
-	public simUpdate(): void {}
+	public Update(): void {}
 
 	public connectedCallback(): void {
 		this.canMove = true;
@@ -44,7 +44,7 @@ export class Wire extends Component {
 		input.wires.add(this);
 	}
 
-	public simUpdate(): void {
+	public Update(): void {
 		this.output?.set(this.input.state);
 		this.requestUpdate();
 	}

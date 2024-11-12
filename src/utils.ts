@@ -1,7 +1,7 @@
 import $ from 'jquery';
 
 export function randomID(): string {
-	return Math.random().toString().slice(2);
+	return crypto.randomUUID();
 }
 
 const alert_ = $<HTMLDialogElement>('#alert');

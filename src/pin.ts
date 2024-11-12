@@ -39,7 +39,7 @@ export class Pin extends Component {
 
 	public set(state: boolean): void {
 		this.state = state;
-		this.simUpdate();
+		this.Update();
 	}
 
 	public offsets() {
@@ -71,10 +71,13 @@ export class Pin extends Component {
 		}
 	}
 
-	public simUpdate(): void {
-		if (this.isInput) return;
+	public Update(): void {
+		if (this.isInput) {
+			this.chip.Update();
+			return;
+		}
 		for (const wire of this.wires) {
-			wire.simUpdate();
+			wire.Update();
 		}
 	}
 

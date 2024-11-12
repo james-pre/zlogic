@@ -1,8 +1,8 @@
 import $ from 'jquery';
 import { html, LitElement, type CSSResult } from 'lit';
 import { property } from 'lit/decorators.js';
-import { randomID } from './utils.js';
 import { pick } from 'utilium';
+import { randomID } from './utils.js';
 
 export type ComponentStyles = CSSResult | ComponentStyles[];
 
@@ -27,7 +27,7 @@ export abstract class Component extends LitElement {
 	/**
 	 * Upper case because lit is dumb
 	 */
-	abstract simUpdate(): void;
+	abstract Update(): void;
 
 	public render() {
 		return html`<div></div>`;
