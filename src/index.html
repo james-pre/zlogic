@@ -6,24 +6,34 @@
 		<title>Logic Simulator</title>
 	</head>
 	<body>
-		<div id="menu">
-			<h1>Logic Simulator</h1>
-			<button class="new">New</button>
-			<button class="load">Load</button>
-		</div>
-
-		<div id="editor-container" tabindex="-1" style="display: none">
-			<div class="toolbar">
-				<select class="add">
-					<option value="" selected hidden>Add Component</option>
-					<optgroup class="builtin" label="Built-in"></optgroup>
-					<optgroup class="project" label="Project"></optgroup>
-				</select>
-				<button class="download">Download Chip</button>
-				<button class="save">Save</button>
-				<button class="reset">Reset</button>
+		<div id="app">
+			<div id="menu">
+				<h1>Logic Simulator</h1>
+				<button class="new">+ New Project</button>
+				<button class="upload">Upload</button>
+				<h3>Your Projects</h3>
+				<ul></ul>
 			</div>
-			<div id="editor"></div>
+
+			<div id="editor-container" tabindex="-1">
+				<div class="closed">
+					<p>Open a project to get started</p>
+				</div>
+
+				<div class="open">
+					<div id="toolbar">
+						<select class="add">
+							<option value="" selected hidden>Add Component</option>
+							<optgroup class="builtin" label="Built-in"></optgroup>
+							<optgroup class="project" label="Project"></optgroup>
+						</select>
+						<button class="download">Download Chip</button>
+						<button class="save">Save</button>
+						<button class="reset">Reset</button>
+					</div>
+					<div id="editor"></div>
+				</div>
+			</div>
 		</div>
 
 		<dialog id="alert">

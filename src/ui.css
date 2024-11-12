@@ -1,19 +1,49 @@
+#app {
+	display: grid;
+	grid-template-columns: max-content 1fr;
+	inset: 0;
+	position: fixed;
+
+	> * {
+		padding: 1em;
+	}
+}
+
 #menu {
-	width: 100%;
+	width: max-content;
 	display: flex;
 	flex-direction: column;
 	gap: 1em;
 	align-items: center;
+	grid-column: 1;
+	border-right: 1px solid #ccc;
+	overflow: hidden;
+	resize: horizontal;
+	text-wrap: nowrap;
 
 	button {
-		width: 300px;
+		width: 150px;
 	}
 }
 
 #editor-container {
-	position: fixed;
-	width: 100%;
-	height: 100%;
+	grid-column: 2;
+	overflow: scroll;
+
+	.closed {
+		text-align: center;
+		position: absolute;
+		width: max-content;
+
+		p {
+			width: 100%;
+		}
+	}
+
+	.open {
+		z-index: 3;
+		display: none;
+	}
 }
 
 #editor {

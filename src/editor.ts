@@ -1,21 +1,22 @@
 import $ from 'jquery';
+import { List } from 'utilium';
+import { download } from 'utilium/dom.js';
+import { Input } from './builtin/io.js';
 import { Chip, chips as chipConstructors } from './chip.js';
-import type { ChipData, ChipFile, EditorState, ProjectFile } from './definitions.js';
+import type { ChipData, ChipFile, EditorState } from './definitions.js';
 import type { Pin } from './pin.js';
 import { alert } from './utils.js';
 import { Wire } from './wire.js';
-import { List } from 'utilium';
-import { Input } from './builtin/io.js';
-import { download } from 'utilium/dom.js';
 
 export const element = $('#editor'),
-	container = $('#editor-container');
+	toolbar = $('#toolbar');
 
 export function clear(): void {}
 
 export function open(): void {
-	$('#menu').hide();
-	container.show();
+	$('div.editor');
+	$('#editor-container .closed').hide();
+	$('#editor-container .open').show();
 }
 
 export const { left: x, top: y } = element.offset()!;
@@ -23,7 +24,7 @@ export const { left: x, top: y } = element.offset()!;
 export const chips = new List<Chip>(),
 	wires = new List<Wire>();
 
-container.find<HTMLSelectElement>('select.add').on('change', e => {
+toolbar.find<HTMLSelectElement>('select.add').on('change', e => {
 	if (!e.target.value) {
 		return;
 	}
@@ -96,11 +97,11 @@ export function state(): EditorState {
 	};
 }
 
-container.find<HTMLSelectElement>('button.save').on('click', e => {
+toolbar.find<HTMLSelectElement>('button.save').on('click', e => {
 	console.log(toJSON());
 });
 
-container.find<HTMLSelectElement>('button.download').on('click', e => {
+toolbar.find<HTMLSelectElement>('button.download').on('click', e => {
 	const chipFile: ChipFile = {
 		version: 0,
 		file: 'chip',
