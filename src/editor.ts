@@ -58,10 +58,21 @@ element.on('click', e => {
 	if (pendingWire && !(e.target instanceof Chip)) {
 		const { left, top } = element.offset()!;
 
-		/**
-		 * @todo add snapping support with shift
-		 */
-		pendingWire.addAnchor(e.clientX - left, e.clientY - top);
+		let anchorX = e.clientX - left;
+		let anchorY = e.clientY - top;
+
+		if (e.shiftKey && pendingWire.anchors.length > 0) {
+			// Snapping logic: Snap along the nearest axis (x or y)
+			const lastAnchor = pendingWire.anchors.at(-1)!;
+
+			if (Math.abs(anchorX - lastAnchor.x) > Math.abs(anchorY - lastAnchor.y)) {
+				anchorY = lastAnchor.y;
+			} else {
+				anchorX = lastAnchor.x;
+			}
+		}
+
+		pendingWire.addAnchor(anchorX, anchorY);
 	}
 });
 

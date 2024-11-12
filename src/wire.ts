@@ -86,9 +86,6 @@ export class Wire extends Component {
 		this.Update();
 	}
 
-	/**
-	 * @todo Implement
-	 */
 	public render() {
 		const { x, y } = this.input.offsets();
 
