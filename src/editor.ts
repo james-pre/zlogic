@@ -65,7 +65,7 @@ element.on('click', e => {
 	}
 });
 
-export function toJSON(): ChipData {
+export function serialize(): ChipData {
 	const chipList = chips.toArray();
 
 	return {
@@ -98,14 +98,14 @@ export function state(): EditorState {
 }
 
 toolbar.find<HTMLSelectElement>('button.save').on('click', e => {
-	console.log(toJSON());
+	console.log(serialize());
 });
 
 toolbar.find<HTMLSelectElement>('button.download').on('click', e => {
 	const chipFile: ChipFile = {
 		version: 0,
 		file: 'chip',
-		chip: toJSON(),
+		chip: serialize(),
 	};
 
 	download(JSON.stringify(chipFile), 'chip.json');
