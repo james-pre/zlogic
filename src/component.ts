@@ -47,6 +47,8 @@ export abstract class Component extends LitElement {
 	private offsetX = 0;
 	private offsetY = 0;
 
+	protected isMoved: boolean = false;
+
 	protected canMove: boolean = false;
 
 	private onMouseDown = (event: MouseEvent) => {
@@ -61,14 +63,18 @@ export abstract class Component extends LitElement {
 	private onMouseMove = (event: MouseEvent) => {
 		if (!this.dragging) return;
 
-		this.x = event.clientX - this.offsetX;
-		this.y = event.clientY - this.offsetY;
+		const newX = event.clientX - this.offsetX;
+		const newY = event.clientY - this.offsetY;
+		this.isMoved ||= newX != this.x || newY != this.y;
+		this.x = newX;
+		this.y = newY;
 	};
 
 	private onMouseUp = () => {
 		if (!this.dragging) return;
 
 		this.dragging = false;
+		this.isMoved = false;
 		this.removeAttribute('dragging');
 	};
 
@@ -91,7 +97,7 @@ export abstract class Component extends LitElement {
 }
 
 export interface ComponentStatic {
-	displayName?: boolean;
+	displayName?: string;
 	isBuiltin?: boolean;
 }
 
@@ -103,6 +109,7 @@ export function register(target: ComponentLike) {
 	customElements.define('sim-' + target.name.toLowerCase(), target);
 	components.set(target.name, target);
 	$('<option />')
+		.val(target.name)
 		.text(target.displayName || target.name)
 		.appendTo('optgroup.' + (target.isBuiltin ? 'builtin' : 'project'));
 }

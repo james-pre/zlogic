@@ -4,6 +4,7 @@ import type { Chip } from './chip.js';
 import { Component } from './component.js';
 import { connectWire, element } from './editor.js';
 import type { Wire } from './wire.js';
+import { colorState } from './utils.js';
 
 @customElement('sim-pin')
 export class Pin extends Component {
@@ -54,9 +55,18 @@ export class Pin extends Component {
 
 	protected updated(_: Map<PropertyKey, unknown>): void {
 		super.updated(_);
-		this.style.backgroundColor = this.state ? '#c44' : '#511';
+		this.style.backgroundColor = colorState(this.state);
+
+		for (const wire of this.wires) {
+			wire.requestUpdate();
+		}
 
 		const chipStyle = getComputedStyle(this.chip);
+
+		if (this.isTop) {
+			this.style.transform = `translate(${this.isInput ? '-1.5em' : `calc(${chipStyle.width} + 0.5em)`})`;
+			return;
+		}
 
 		const pins = this.isInput ? this.chip.inputs : this.chip.outputs;
 		const index = pins.toArray().indexOf(this);
@@ -65,17 +75,13 @@ export class Pin extends Component {
 			y = `calc(${(index - (pins.size - 1) / 2) * 20}px - calc(${chipStyle.height} / 2))`;
 
 		this.style.transform = `translate(${x}, ${y})`;
-
-		for (const wire of this.wires) {
-			wire.requestUpdate();
-		}
 	}
 
 	public Update(): void {
-		if (this.isInput) {
+		if (this.isInput || this.isTop) {
 			this.chip.Update();
-			return;
 		}
+		if (this.isInput) return;
 		for (const wire of this.wires) {
 			wire.Update();
 		}

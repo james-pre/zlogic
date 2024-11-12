@@ -2,6 +2,7 @@ import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { Component } from './component.js';
 import type { Pin } from './pin.js';
+import { colorState } from './utils.js';
 
 @customElement('sim-anchor')
 export class WireAnchor extends Component {
@@ -63,11 +64,23 @@ export class Wire extends Component {
 		if (this.isCompleted) {
 			return;
 		}
-		this.output = output;
+		if (this.input == output) {
+			return;
+		}
+		if (output.isInput) {
+			// normal
+			this.output = output;
+		} else {
+			// reverse
+			this.output = this.input;
+			this.input = output;
+			this.anchors.reverse();
+		}
+
 		output.wires.add(this);
-		this.output.set(this.input.state);
+
 		this.isCompleted = true;
-		this.requestUpdate();
+		this.Update();
 	}
 
 	/**
@@ -87,6 +100,6 @@ export class Wire extends Component {
 			path += `L ${x} ${y}`;
 		}
 
-		return html`<svg xmlns="http://www.w3.org/2000/svg"><path d="${path}" style="stroke:${this.input.state ? '#c44' : '#511'}" /></svg>`;
+		return html`<svg xmlns="http://www.w3.org/2000/svg"><path d="${path}" style="stroke:${colorState(this.input.state)}" /></svg>`;
 	}
 }

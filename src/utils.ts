@@ -19,3 +19,7 @@ export function alert(text: string): Promise<void> {
 
 	return promise;
 }
+
+export function colorState(state: boolean): string {
+	return state ? '#c44' : '#511';
+}

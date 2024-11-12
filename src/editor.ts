@@ -48,6 +48,10 @@ export function connectWire(pin: Pin) {
 element.on('click', e => {
 	if (pendingWire && !(e.target instanceof Chip)) {
 		const { left, top } = element.offset()!;
+
+		/**
+		 * @todo add snapping support with shift
+		 */
 		pendingWire.addAnchor(e.clientX - left, e.clientY - top);
 	}
 });
