@@ -1,3 +1,5 @@
+/* Static data structures and functions. These are used for serialization */
+
 export interface WireData {
 	/**
 	 * From sub-chip index, pin no.
@@ -34,6 +36,7 @@ export interface EditorState {
 export interface ProjectFile {
 	version: number;
 	file: 'project';
+	name: string;
 	editor: ChipData;
 	state: EditorState;
 	chips: ChipData[];
@@ -46,3 +49,5 @@ export interface ChipFile {
 }
 
 export type FileData = ProjectFile | ChipFile;
+
+export const version = 0;

@@ -1,7 +1,5 @@
-import $ from 'jquery';
 import { html, LitElement, type CSSResult } from 'lit';
 import { property } from 'lit/decorators.js';
-import { pick } from 'utilium';
 import { randomID } from './utils.js';
 
 export type ComponentStyles = CSSResult | ComponentStyles[];

@@ -3,7 +3,7 @@ import { List } from 'utilium';
 import { download } from 'utilium/dom.js';
 import { Input } from './builtin/index.js'; // Need side-effects
 import { Chip, chips as chipConstructors } from './chip.js';
-import type { ChipData, ChipFile, EditorState } from './definitions.js';
+import type { ChipData, ChipFile, EditorState } from './static.js';
 import type { Pin } from './pin.js';
 import { popup } from './utils.js';
 import { Wire } from './wire.js';

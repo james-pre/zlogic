@@ -21,6 +21,11 @@
 	button {
 		width: 150px;
 	}
+
+	ul {
+		list-style: none;
+		padding: none;
+	}
 }
 
 #editor-container {
