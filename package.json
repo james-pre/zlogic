@@ -27,7 +27,7 @@
 		"url": "https://github.com/james-pre/logic-sim/issues"
 	},
 	"engines": {
-		"node": ">= 16"
+		"node": ">= 20"
 	},
 	"exports": {
 		".": "./dist/index.js",
@@ -58,10 +58,11 @@
 	},
 	"dependencies": {
 		"@types/jquery": "^3.5.31",
+		"@types/node": "^22.9.0",
 		"eventemitter3": "^5.0.1",
 		"jquery": "^3.7.1",
 		"lit": "^3.2.1",
-		"utilium": "^0.7.1",
+		"utilium": "^1.0.4",
 		"vite": "^5.4.10"
 	}
 }

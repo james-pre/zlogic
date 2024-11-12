@@ -44,13 +44,12 @@ export abstract class Chip extends Component {
 	protected updated(_: Map<PropertyKey, unknown>): void {
 		super.updated(_);
 		this.style.transform = `translate(${this.x}px, ${this.y}px)`;
-	}
-
-	public simUpdate(): void {
 		for (const pin of this.pins) {
 			pin.requestUpdate();
 		}
 	}
+
+	public simUpdate(): void {}
 
 	public connectedCallback(): void {
 		this.canMove = true;
