@@ -68,7 +68,9 @@ export abstract class Chip extends Component {
 
 		this.x = event.clientX - this.offsetX;
 		this.y = event.clientY - this.offsetY;
-		this.style.transform = `translate(${this.x}px, ${this.y}px)`;
+		for (const pin of this.pins) {
+			pin.requestUpdate();
+		}
 	};
 
 	private onMouseUp = () => {

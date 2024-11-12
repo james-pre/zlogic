@@ -57,9 +57,14 @@ export class Pin extends Component {
 			y = `calc(${(index - (pins.size - 1) / 2) * 20}px - calc(${chipStyle.height} / 2))`;
 
 		this.style.transform = `translate(${x}, ${y})`;
+
+		for (const wire of this.wires) {
+			wire.requestUpdate();
+		}
 	}
 
 	public simUpdate(): void {
+		if (this.isInput) return;
 		for (const wire of this.wires) {
 			wire.simUpdate();
 		}

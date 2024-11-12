@@ -59,6 +59,8 @@ export class Wire extends Component {
 			return;
 		}
 		this.output = output;
+		output.wires.add(this);
+		this.output.set(this.input.state);
 		this.isCompleted = true;
 		this.requestUpdate();
 	}
