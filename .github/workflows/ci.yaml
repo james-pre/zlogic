@@ -15,6 +15,13 @@ jobs:
         defaults:
             run:
                 shell: bash
+        permissions:
+            contents: write
+            id-token: write
+            pages: write
+        environment:
+            name: github-pages
+            url: ${{ steps.deploy.outputs.page_url }}
         steps:
             - name: Checkout
               uses: actions/checkout@v4
@@ -35,3 +42,12 @@ jobs:
 
             - name: Build
               run: npx vite build
+
+            - name: Upload
+              uses: actions/upload-pages-artifact@v3
+              with:
+                  path: ./build
+
+            - name: Deploy
+              id: deploy
+              uses: actions/deploy-pages@v4
