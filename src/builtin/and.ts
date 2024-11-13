@@ -1,7 +1,7 @@
 import { Chip, register } from '../chip.js';
 import { Pin } from '../pin.js';
 
-@register({ builtin: true })
+@register({ builtin: true, eval: ([a, b]) => [a && b] })
 export class AND extends Chip {
 	public static color = this.randomColor();
 
