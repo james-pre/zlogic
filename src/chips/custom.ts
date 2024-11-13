@@ -29,6 +29,11 @@ export class CustomChip extends Chip {
 }
 
 export function chip_eval(kind: string, input_values: boolean[], _debug: boolean = false): boolean[] {
+	if (kind == 'output') {
+		if (_debug) console.debug('[chip_eval] (output)', input_values);
+		return input_values;
+	}
+
 	const chip = chips.get(kind);
 
 	if (!chip) throw 'Chip does not exist: ' + kind;
@@ -99,20 +104,15 @@ export function chip_eval(kind: string, input_values: boolean[], _debug: boolean
 		if (_debug) console.group('depth', depth);
 
 		for (const i of currentSubChips) {
-			const inputs = subChips.get(i) || [];
-
 			// Step 5b: Throw error if the sub-chip has already been evaluated
 			if (evaluatedSubChips.has(i) && !chips.get(data.chips[i].kind)?.builtin) {
-				throw `Invalid chip evaluation flow: sub-chip at index ${i} has already been evaluated.`;
+				throw `sub-chip at index ${i} has already been evaluated.`;
 			}
 
-			// Step 5a: Throw error if the sub-chip is of kind "input"
-			if (data.chips[i].kind === 'input') {
-				console.warn(`chip evaluation flow: sub-chip at index ${i} is an "input" chip.`);
-			}
+			if (!subChips.has(i)) throw 'Missing input data for sub-chip at index ' + i;
 
 			// Evaluate the sub-chip outputs and store results
-			const subOutputs = chip_eval(data.chips[i].kind, inputs);
+			const subOutputs = chip_eval(data.chips[i].kind, subChips.get(i)!);
 			evaluatedSubChips.add(i);
 
 			// Step 5c: Check if the sub-chip is an "output" chip
@@ -122,7 +122,6 @@ export function chip_eval(kind: string, input_values: boolean[], _debug: boolean
 			} else {
 				// Step 5d: Store evaluated sub-chip's outputs and mark for further propagation
 				subChips.set(i, subOutputs);
-				nextSubChips.add(i);
 			}
 
 			// Propagate output through wires to other sub-chips
@@ -132,7 +131,7 @@ export function chip_eval(kind: string, input_values: boolean[], _debug: boolean
 				toChipInputs[wire.to[1]] = subOutputs[wire.from[1]];
 				subChips.set(wire.to[0], toChipInputs);
 				nextSubChips.add(wire.to[0]);
-				if (_debug) console.debug('update', wire);
+				if (_debug) console.debug('update', wire.from.join(','), '---', wire.to.join(','));
 			}
 		}
 
@@ -149,5 +148,5 @@ export function chip_eval(kind: string, input_values: boolean[], _debug: boolean
 		console.debug(output_values);
 		console.groupEnd();
 	}
-	return output_values;
+	return output_values.filter((v, i) => data.chips[i].kind == 'output');
 }

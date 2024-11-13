@@ -5,13 +5,13 @@ import { Pin } from '../pin.js';
 export class OR extends Chip {
 	public static color = this.randomColor();
 
+	protected output = new Pin(this, false);
+
 	public constructor() {
 		super();
 		new Pin(this, true);
 		new Pin(this, true);
 	}
-
-	protected output = new Pin(this, false);
 
 	public Update(): void {
 		this.output.set(this.inputs.toArray().some(pin => pin.state));

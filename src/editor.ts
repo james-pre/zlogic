@@ -110,12 +110,12 @@ export function load(data: ChipData): void {
 	}
 
 	for (const { from, to, anchors } of data.wires) {
-		const wire = new Wire(chips.at(from[0]).pins.at(from[1]));
+		const wire = new Wire(chips.at(from[0]).outputs.at(from[1]));
 
 		for (const [x, y] of anchors) {
 			wire.addAnchor(x, y);
 		}
-		wire.complete(chips.at(to[0]).pins.at(to[1]));
+		wire.complete(chips.at(to[0]).inputs.at(to[1]));
 		wires.add(wire);
 		element.append(wire);
 	}
@@ -132,15 +132,15 @@ export function serialize(): ChipData {
 		chips: chipList.map(chip => ({ kind: chip.constructor.id, x: chip.x, y: chip.y })),
 		wires: wires.toArray().map(wire => {
 			const in_chip = wire.input.chip;
-			const in_pin = in_chip.pins.toArray().indexOf(wire.input);
+			const in_pin = in_chip.outputs.toArray().indexOf(wire.input);
 
 			const out_chip = wire.output!.chip;
-			const out_pin = out_chip.pins.toArray().indexOf(wire.output!);
+			const out_pin = out_chip.inputs.toArray().indexOf(wire.output!);
 
 			return {
 				from: [chipList.indexOf(in_chip), in_pin],
 				to: [chipList.indexOf(out_chip), out_pin],
-				anchors: wire.anchors.map(a => [a.x, a.y]),
+				anchors: wire.anchors.map(a => [+a.x.toFixed(), +a.y.toFixed()]),
 			};
 		}),
 	};
