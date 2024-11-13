@@ -3,12 +3,24 @@ import { open as openEditor } from './editor.js';
 import { popup } from './utils.js';
 import { version, type ProjectFile } from './static.js';
 
-export async function create(): Promise<void> {
-	const name = await popup(true, 'Project name: <input />');
-	open();
+export async function create(): Promise<ProjectFile> {
+	const name = (await popup(true, 'Project name: <input />')) || '';
+
+	const project: ProjectFile = {
+		file: 'project',
+		version,
+		name,
+		chips: [],
+		editor: { id: '', name: '', chips: [], wires: [] },
+		state: { input: [] },
+	};
+
+	open(project);
+	createUI(project);
+	return project;
 }
 
-export function open() {
+export function open(project: ProjectFile) {
 	openEditor();
 	$('#menu .projects').hide();
 	$('#menu .chips').show();
@@ -34,7 +46,7 @@ export function parse(data_str: string | null): ProjectFile {
 	return data as object as ProjectFile;
 }
 
-declare function createUI(project: ProjectFile): void;
+export function createUI(project: ProjectFile): void {}
 
 export function load(id: string) {
 	const project_str = localStorage.getItem('project:' + id);
@@ -48,4 +60,5 @@ export function load(id: string) {
 	}
 
 	createUI(data);
+	open(data);
 }

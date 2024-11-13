@@ -16,7 +16,7 @@
 					<ul></ul>
 				</div>
 				<div class="chips" style="display: none">
-					<button class="download">Download Project</button>
+					<button id="download-project">Download Project</button>
 					<button class="new-chip">New Chip</button>
 					<h3>Chips</h3>
 					<ul></ul>
@@ -30,6 +30,8 @@
 
 				<div class="open">
 					<div id="toolbar">
+						<input class="id" type="hidden" />
+						<input class="name" type="text" placeholder="Component Name" />
 						<select class="add">
 							<option value="" selected hidden>Add Component</option>
 							<optgroup class="builtin" label="Built-in"></optgroup>

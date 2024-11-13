@@ -6,12 +6,16 @@ import { Chip, chips as chipConstructors } from './chip.js';
 import type { ChipData, ChipFile, EditorState } from './static.js';
 import type { Pin } from './pin.js';
 import { popup } from './utils.js';
-import { Wire } from './wire.js';
+import { Wire, WireAnchor } from './wire.js';
 
 export const element = $('#editor'),
 	toolbar = $('#toolbar');
 
-export function clear(): void {}
+export function clear(): void {
+	for (const chip of chips) {
+		chip.remove();
+	}
+}
 
 export function open(): void {
 	$('div.editor');
@@ -24,20 +28,28 @@ export const { left: x, top: y } = element.offset()!;
 export const chips = new List<Chip>(),
 	wires = new List<Wire>();
 
-toolbar.find<HTMLSelectElement>('select.add').on('change', e => {
-	if (!e.target.value) {
-		return;
-	}
-
-	const ChipCtor = chipConstructors.get(e.target.value);
+export function addChip(id: string): Chip {
+	const ChipCtor = chipConstructors.get(id);
 	if (!ChipCtor) {
-		void popup(false, 'Component does not exist');
-		return;
+		throw 'Component does not exist';
 	}
 
 	const subChip = new ChipCtor();
 	chips.add(subChip);
 	element.append(subChip);
+	return subChip;
+}
+
+toolbar.find<HTMLSelectElement>('select.add').on('change', e => {
+	if (!e.target.value) {
+		return;
+	}
+
+	try {
+		addChip(e.target.value);
+	} catch (text: any) {
+		void popup(false, text as string);
+	}
 	e.target.value = '';
 });
 
@@ -76,12 +88,38 @@ element.on('click', e => {
 	}
 });
 
+export function load(data: ChipData): void {
+	clear();
+	toolbar.find<HTMLInputElement>('input.id').val(data.id);
+	toolbar.find<HTMLInputElement>('input.name').val(data.name);
+
+	for (const { kind, x, y } of data.chips) {
+		const chip = addChip(kind);
+		chip.x = x;
+		chip.y = y;
+	}
+
+	for (const { from, to, anchors } of data.wires) {
+		const wire = new Wire(chips.at(from[0]).pins.at(from[1]));
+
+		for (const [x, y] of anchors) {
+			const anchor = new WireAnchor();
+			anchor.x = x;
+			anchor.y = y;
+		}
+		wire.complete(chips.at(to[0]).pins.at(to[1]));
+		wires.add(wire);
+	}
+}
+
 export function serialize(): ChipData {
 	const chipList = chips.toArray();
+	const name = toolbar.find<HTMLInputElement>('input.name').val() || '';
+	const id = toolbar.find<HTMLInputElement>('input.id').val() || name.toLowerCase().replaceAll(' ', '_');
 
 	return {
-		id: '',
-		name: '',
+		id,
+		name,
 		chips: chipList.map(chip => ({ kind: chip.constructor.id, x: chip.x, y: chip.y })),
 		wires: wires.toArray().map(wire => {
 			const in_chip = wire.input.chip;
@@ -108,9 +146,7 @@ export function state(): EditorState {
 	};
 }
 
-toolbar.find<HTMLSelectElement>('button.save').on('click', e => {
-	console.log(serialize());
-});
+toolbar.find<HTMLSelectElement>('button.save').on('click', e => {});
 
 toolbar.find<HTMLSelectElement>('button.download').on('click', e => {
 	const chipFile: ChipFile = {
