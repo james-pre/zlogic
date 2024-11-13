@@ -1,5 +1,5 @@
 import { css, html } from 'lit';
-import { Chip, register } from '../chip.js';
+import { Chip, register } from './chip.js';
 import { Pin } from '../pin.js';
 import { colorState } from '../utils.js';
 
@@ -50,7 +50,7 @@ export class IO extends Chip {
 	}
 }
 
-@register({ builtin: true, display: 'Input Pin' })
+@register({ builtin: true, display: 'Input Pin', eval: ([a]) => [a] })
 export class Input extends IO {
 	public constructor() {
 		super(false);
@@ -62,7 +62,7 @@ export class Input extends IO {
 	}
 }
 
-@register({ builtin: true, display: 'Output Pin' })
+@register({ builtin: true, display: 'Output Pin', eval: ([a]) => [a] })
 export class Output extends IO {
 	public constructor() {
 		super(true);

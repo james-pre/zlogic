@@ -1,8 +1,8 @@
 import $ from 'jquery';
 import { List } from 'utilium';
 import { download } from 'utilium/dom.js';
-import { Input } from './builtin/index.js'; // Need side-effects
-import { Chip, chips as chipConstructors } from './chip.js';
+import { Input } from './chips/index.js'; // Need side-effects
+import { Chip, chips as chipConstructors } from './chips/chip.js';
 import type { Pin } from './pin.js';
 import type { ChipData, ChipFile, EditorState } from './static.js';
 import { popup } from './utils.js';
@@ -15,6 +15,10 @@ export function clear(): void {
 	for (const chip of chips) {
 		chips.delete(chip);
 		chip.remove();
+	}
+	for (const wire of wires) {
+		wires.delete(wire);
+		wire.remove();
 	}
 	toolbar.find('input').val('');
 }

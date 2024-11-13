@@ -1,4 +1,4 @@
-import { Chip, register } from '../chip.js';
+import { Chip, register } from './chip.js';
 import { Pin } from '../pin.js';
 
 @register({ builtin: true, eval: ([a, b]) => [a || b] })

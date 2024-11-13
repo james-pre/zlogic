@@ -1,8 +1,10 @@
 import $ from 'jquery';
-import * as editor from './editor.js';
-import { popup } from './utils.js';
-import { version, type ChipData, type ProjectFile } from './static.js';
 import { download, upload } from 'utilium/dom.js';
+import { register } from './chips/chip.js';
+import * as editor from './editor.js';
+import { version, type ChipData, type ProjectFile } from './static.js';
+import { popup } from './utils.js';
+import { CustomChip } from './chips/custom.js';
 
 let currentProject: ProjectFile | null;
 
@@ -22,14 +24,14 @@ export function create(name: string = ''): ProjectFile {
 }
 
 export function open(project: ProjectFile) {
+	for (const chip of project.chips) {
+		createChip(chip);
+	}
 	editor.open();
 	editor.load(project.editor);
 	const inputs = editor.inputs();
 	for (let i = 0; i < Math.min(inputs.length, project.state.input.length); i++) {
 		inputs[i].pin.set(project.state.input[i] == 1);
-	}
-	for (const chip of project.chips) {
-		createChip(chip);
 	}
 	currentProject = project;
 	$('#menu .projects').hide();
@@ -83,6 +85,15 @@ export function createChip(chip: ChipData) {
 			if (!currentProject) return;
 			editor.load(currentProject.chips.find(chip => chip.id == chip.id)!);
 		});
+
+	@register({
+		builtin: false,
+		id: chip.id,
+		display: chip.name,
+	})
+	class __CustomChip__ extends CustomChip {
+		static data = chip;
+	}
 }
 
 editor.toolbar.find<HTMLSelectElement>('button.save').on('click', e => {

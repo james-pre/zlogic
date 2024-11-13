@@ -1,6 +1,6 @@
 import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import type { Chip } from './chip.js';
+import type { Chip } from './chips/chip.js';
 import { Component } from './component.js';
 import { connectWire, element } from './editor.js';
 import type { Wire } from './wire.js';
