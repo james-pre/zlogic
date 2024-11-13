@@ -41,7 +41,7 @@ export abstract class Component extends LitElement {
 	public constructor() {
 		super();
 		this.classList.add('component');
-		this.addEventListener('click', (e: MouseEvent) => {
+		this.addEventListener('auxclick', (e: MouseEvent) => {
 			if (e.button == 1) {
 				this.remove();
 			}
