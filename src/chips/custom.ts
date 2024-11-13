@@ -104,7 +104,7 @@ export function chip_eval(kind: string, input_values: boolean[], _debug: boolean
 		if (_debug) console.group('depth', depth);
 
 		for (const i of currentSubChips) {
-			// Step 5b: Throw error if the sub-chip has already been evaluated
+			// Throw error if the sub-chip has already been evaluated
 			if (evaluatedSubChips.has(i) && !chips.get(data.chips[i].kind)?.builtin) {
 				throw `sub-chip at index ${i} has already been evaluated.`;
 			}
@@ -115,12 +115,12 @@ export function chip_eval(kind: string, input_values: boolean[], _debug: boolean
 			const subOutputs = chip_eval(data.chips[i].kind, subChips.get(i)!);
 			evaluatedSubChips.add(i);
 
-			// Step 5c: Check if the sub-chip is an "output" chip
+			// Check if the sub-chip is an "output" chip
 			if (data.chips[i].kind == 'output') {
 				if (_debug) console.debug('set output', i, 'to', subOutputs[0]);
 				output_values[i] = subOutputs[0];
 			} else {
-				// Step 5d: Store evaluated sub-chip's outputs and mark for further propagation
+				// Store evaluated sub-chip's outputs
 				subChips.set(i, subOutputs);
 			}
 
