@@ -25,6 +25,7 @@ export interface SubChip {
 export interface ChipData {
 	id: string;
 	name: string;
+	color: string;
 	chips: SubChip[];
 	wires: WireData[];
 }

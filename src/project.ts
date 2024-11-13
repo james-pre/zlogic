@@ -15,7 +15,7 @@ export function create(name: string = ''): ProjectFile {
 		id: name.replaceAll(' ', '_'),
 		name,
 		chips: [],
-		editor: { id: '', name: '', chips: [], wires: [] },
+		editor: { id: '', name: '', chips: [], wires: [], color: '' },
 		state: { input: [] },
 	};
 

@@ -1,17 +1,14 @@
 import $ from 'jquery';
 import { css, html } from 'lit';
-import { List, randomInt } from 'utilium';
+import { List } from 'utilium';
 import { Component } from '../component.js';
 import type { Pin } from '../pin.js';
+import { randomColor } from '../utils.js';
 
 export abstract class Chip extends Component {
 	declare ['constructor']: ChipMetadata & typeof Chip;
 
-	static randomColor(): string {
-		return '#' + randomInt(222, 999);
-	}
-
-	static color = this.randomColor();
+	static color = randomColor();
 
 	static styles = css`
 		:host {

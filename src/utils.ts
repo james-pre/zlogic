@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import { randomInt } from 'utilium';
 
 export function randomID(): string {
 	return crypto.randomUUID();
@@ -22,4 +23,8 @@ export function popup(isPrompt: boolean, contents: string): Promise<string | und
 
 export function colorState(state: boolean): string {
 	return state ? '#c44' : '#511';
+}
+
+export function randomColor(): string {
+	return '#' + randomInt(444, 999).toString().replace(/./g, '$&$&');
 }

@@ -5,7 +5,7 @@ import { Input } from './chips/index.js'; // Need side-effects
 import { Chip, chips as chipConstructors } from './chips/chip.js';
 import type { Pin } from './pin.js';
 import type { ChipData, ChipFile, EditorState } from './static.js';
-import { popup } from './utils.js';
+import { popup, randomColor } from './utils.js';
 import { Wire } from './wire.js';
 
 export const element = $('#editor'),
@@ -20,7 +20,8 @@ export function clear(): void {
 		wires.delete(wire);
 		wire.remove();
 	}
-	toolbar.find('input').val('');
+	toolbar.find('input').not('.color').val('');
+	toolbar.find<HTMLInputElement>('input.color').val(randomColor());
 }
 
 export function open(): void {
@@ -102,6 +103,7 @@ export function load(data: ChipData): void {
 	clear();
 	toolbar.find<HTMLInputElement>('input.id').val(data.id);
 	toolbar.find<HTMLInputElement>('input.name').val(data.name);
+	toolbar.find<HTMLInputElement>('input.color').val(data.color);
 
 	for (const { kind, x, y } of data.chips) {
 		const chip = addChip(kind);
@@ -125,10 +127,12 @@ export function serialize(): ChipData {
 	const chipList = chips.toArray();
 	const name = toolbar.find<HTMLInputElement>('input.name').val() || '';
 	const id = toolbar.find<HTMLInputElement>('input.id').val() || name.toLowerCase().replaceAll(' ', '_');
+	const color = toolbar.find<HTMLInputElement>('input.color').val() || randomColor();
 
 	return {
 		id,
 		name,
+		color,
 		chips: chipList.map(chip => ({ kind: chip.constructor.id, x: chip.x, y: chip.y })),
 		wires: wires.toArray().map(wire => {
 			const in_chip = wire.input.chip;
