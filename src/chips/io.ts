@@ -1,3 +1,5 @@
+/* Built-in I/O "chips" */
+
 import { css, html } from 'lit';
 import { Chip, register } from './chip.js';
 import { Pin } from '../pin.js';
