@@ -72,7 +72,16 @@ export function load(id: string) {
 	open(data);
 }
 
-editor.toolbar.find<HTMLSelectElement>('button.save').on('click', e => {});
+editor.toolbar.find<HTMLSelectElement>('button.save').on('click', e => {
+	if (!currentProject) return;
+	const newChip = editor.serialize();
+	const i = currentProject.chips.findIndex(chip => chip.id == newChip.id);
+	if (i == -1) {
+		currentProject.chips.push(newChip);
+	} else {
+		currentProject.chips.splice(i, 1, newChip);
+	}
+});
 
 $('#project-upload').on('click', () => {
 	void upload('json', false)
