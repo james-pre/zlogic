@@ -1,27 +1,34 @@
 import $ from 'jquery';
-import { open as openEditor } from './editor.js';
+import * as editor from './editor.js';
 import { popup } from './utils.js';
 import { version, type ProjectFile } from './static.js';
+import { download, upload } from 'utilium/dom.js';
 
-export async function create(): Promise<ProjectFile> {
-	const name = (await popup(true, 'Project name: <input />')) || '';
+let currentProject: ProjectFile | null;
 
+export function create(name: string = ''): ProjectFile {
 	const project: ProjectFile = {
 		file: 'project',
 		version,
+		id: name.replaceAll(' ', '_'),
 		name,
 		chips: [],
 		editor: { id: '', name: '', chips: [], wires: [] },
 		state: { input: [] },
 	};
 
-	open(project);
 	createUI(project);
 	return project;
 }
 
 export function open(project: ProjectFile) {
-	openEditor();
+	editor.open();
+	editor.load(project.editor);
+	const inputs = editor.inputs();
+	for (let i = 0; i < Math.min(inputs.length, project.state.input.length); i++) {
+		inputs[i].pin.set(project.state.input[i] == 1);
+	}
+	currentProject = project;
 	$('#menu .projects').hide();
 	$('#menu .chips').show();
 }
@@ -46,7 +53,9 @@ export function parse(data_str: string | null): ProjectFile {
 	return data as object as ProjectFile;
 }
 
-export function createUI(project: ProjectFile): void {}
+export function createUI(project: ProjectFile): void {
+	$('<li />').html(`<p class="name">${project.name}</p>`).appendTo('.projects ul');
+}
 
 export function load(id: string) {
 	const project_str = localStorage.getItem('project:' + id);
@@ -62,3 +71,21 @@ export function load(id: string) {
 	createUI(data);
 	open(data);
 }
+
+editor.toolbar.find<HTMLSelectElement>('button.save').on('click', e => {});
+
+$('#project-upload').on('click', () => {
+	void upload('json', false)
+		.then(file => file.text())
+		.then(parse)
+		.then(project => {
+			createUI(project);
+			open(project);
+		});
+});
+
+$('#project-download').on('click', () => {
+	if (!currentProject) return;
+	currentProject.editor = editor.serialize();
+	download(JSON.stringify(currentProject), currentProject.id + '.json');
+});

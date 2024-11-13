@@ -36,6 +36,7 @@ export interface EditorState {
 export interface ProjectFile {
 	version: number;
 	file: 'project';
+	id: string;
 	name: string;
 	editor: ChipData;
 	state: EditorState;

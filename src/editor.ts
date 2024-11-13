@@ -13,6 +13,7 @@ export const element = $('#editor'),
 
 export function clear(): void {
 	for (const chip of chips) {
+		chips.delete(chip);
 		chip.remove();
 	}
 }
@@ -38,6 +39,10 @@ export function addChip(id: string): Chip {
 	chips.add(subChip);
 	element.append(subChip);
 	return subChip;
+}
+
+export function inputs(): Input[] {
+	return chips.toArray().filter(chip => chip instanceof Input);
 }
 
 toolbar.find<HTMLSelectElement>('select.add').on('change', e => {
@@ -103,12 +108,11 @@ export function load(data: ChipData): void {
 		const wire = new Wire(chips.at(from[0]).pins.at(from[1]));
 
 		for (const [x, y] of anchors) {
-			const anchor = new WireAnchor();
-			anchor.x = x;
-			anchor.y = y;
+			wire.addAnchor(x, y);
 		}
 		wire.complete(chips.at(to[0]).pins.at(to[1]));
 		wires.add(wire);
+		element.append(wire);
 	}
 }
 
@@ -139,14 +143,9 @@ export function serialize(): ChipData {
 
 export function state(): EditorState {
 	return {
-		input: chips
-			.toArray()
-			.filter(chip => chip instanceof Input)
-			.map(input => +input.pin.state as 0 | 1),
+		input: inputs().map(input => +input.pin.state as 0 | 1),
 	};
 }
-
-toolbar.find<HTMLSelectElement>('button.save').on('click', e => {});
 
 toolbar.find<HTMLSelectElement>('button.download').on('click', e => {
 	const chipFile: ChipFile = {
@@ -157,3 +156,5 @@ toolbar.find<HTMLSelectElement>('button.download').on('click', e => {
 
 	download(JSON.stringify(chipFile), 'chip.json');
 });
+
+toolbar.find('button.reset').on('click', clear);

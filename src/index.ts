@@ -2,9 +2,10 @@ import './styles.css';
 import './ui.css';
 import $ from 'jquery';
 import * as project from './project.js';
+import { popup } from './utils.js';
 
 $('#menu button.new').on('click', () => {
-	void project.create();
+	void popup(true, 'Project name: <input />').then(project.create).then(project.open);
 });
 
 $(document.body).on('keydown', e => {
