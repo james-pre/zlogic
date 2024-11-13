@@ -3,10 +3,10 @@ import { List } from 'utilium';
 import { download } from 'utilium/dom.js';
 import { Input } from './builtin/index.js'; // Need side-effects
 import { Chip, chips as chipConstructors } from './chip.js';
-import type { ChipData, ChipFile, EditorState } from './static.js';
 import type { Pin } from './pin.js';
+import type { ChipData, ChipFile, EditorState } from './static.js';
 import { popup } from './utils.js';
-import { Wire, WireAnchor } from './wire.js';
+import { Wire } from './wire.js';
 
 export const element = $('#editor'),
 	toolbar = $('#toolbar');
@@ -16,6 +16,7 @@ export function clear(): void {
 		chips.delete(chip);
 		chip.remove();
 	}
+	toolbar.find('input').val('');
 }
 
 export function open(): void {
@@ -158,3 +159,5 @@ toolbar.find<HTMLSelectElement>('button.download').on('click', e => {
 });
 
 toolbar.find('button.reset').on('click', clear);
+
+$('#chip-create').on('click', clear);

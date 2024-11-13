@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import * as editor from './editor.js';
 import { popup } from './utils.js';
-import { version, type ProjectFile } from './static.js';
+import { version, type ChipData, type ProjectFile } from './static.js';
 import { download, upload } from 'utilium/dom.js';
 
 let currentProject: ProjectFile | null;
@@ -27,6 +27,9 @@ export function open(project: ProjectFile) {
 	const inputs = editor.inputs();
 	for (let i = 0; i < Math.min(inputs.length, project.state.input.length); i++) {
 		inputs[i].pin.set(project.state.input[i] == 1);
+	}
+	for (const chip of project.chips) {
+		createChip(chip);
 	}
 	currentProject = project;
 	$('#menu .projects').hide();
@@ -72,11 +75,22 @@ export function load(id: string) {
 	open(data);
 }
 
+export function createChip(chip: ChipData) {
+	$('<li />')
+		.text(chip.name)
+		.appendTo('.chips ul')
+		.on('click', () => {
+			if (!currentProject) return;
+			editor.load(currentProject.chips.find(chip => chip.id == chip.id)!);
+		});
+}
+
 editor.toolbar.find<HTMLSelectElement>('button.save').on('click', e => {
 	if (!currentProject) return;
 	const newChip = editor.serialize();
 	const i = currentProject.chips.findIndex(chip => chip.id == newChip.id);
 	if (i == -1) {
+		createChip(newChip);
 		currentProject.chips.push(newChip);
 	} else {
 		currentProject.chips.splice(i, 1, newChip);

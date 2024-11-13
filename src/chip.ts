@@ -3,6 +3,7 @@ import { css, html } from 'lit';
 import { List, randomInt } from 'utilium';
 import { Component } from './component.js';
 import type { Pin } from './pin.js';
+import type { ChipData } from './static.js';
 
 export abstract class Chip extends Component {
 	declare ['constructor']: ChipMetadata & typeof Chip;
@@ -70,6 +71,30 @@ export abstract class Chip extends Component {
 			<p>${ctor.display || ctor.name}</p>
 			${this.pins.toArray()}
 		`;
+	}
+}
+
+export function chip_eval(chip: ChipData, input_values: boolean[]): boolean[] {
+	const inputs = chip.chips.filter(chip => chip.kind == 'input').map(s => s.kind);
+
+	return [];
+}
+
+export class CustomChip extends Chip {
+	public constructor(public readonly data: ChipData) {
+		super();
+	}
+
+	public Update(): void {
+		const inputs = this.inputs.toArray().map(input => input.state);
+
+		const out_values = chip_eval(this.data, inputs);
+
+		const out_pins = this.outputs;
+
+		for (let i = 0; i < out_pins.size; i++) {
+			out_pins.at(i).set(out_values[i]);
+		}
 	}
 }
 
