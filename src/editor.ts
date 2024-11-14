@@ -1,8 +1,8 @@
 import $ from 'jquery';
 import { List } from 'utilium';
 import { download } from 'utilium/dom.js';
-import { Input } from './chips/index.js'; // Need side-effects
 import { Chip, chips as chipConstructors } from './chips/chip.js';
+import { Input } from './chips/index.js'; // Need side-effects
 import type { Pin } from './pin.js';
 import type { ChipData, ChipFile, EditorState } from './static.js';
 import { popup, randomColor } from './utils.js';
@@ -41,6 +41,9 @@ export function addChip(id: string): Chip {
 	const ChipCtor = chipConstructors.get(id);
 	if (!ChipCtor) {
 		throw 'Component does not exist';
+	}
+	if (id == toolbar.find('input.id').val()) {
+		throw 'Can not add a chip to itself';
 	}
 
 	const subChip = new ChipCtor();
@@ -110,9 +113,9 @@ element.on('click', e => {
 
 export function load(data: ChipData): void {
 	clear();
-	toolbar.find<HTMLInputElement>('input.id').val(data.id);
-	toolbar.find<HTMLInputElement>('input.name').val(data.name);
-	toolbar.find<HTMLInputElement>('input.color').val(data.color);
+	toolbar.find('input.id').val(data.id);
+	toolbar.find('input.name').val(data.name);
+	toolbar.find('input.color').val(data.color);
 
 	for (const { kind, x, y } of data.chips) {
 		const chip = addChip(kind);
@@ -138,7 +141,7 @@ export function load(data: ChipData): void {
 export function serialize(): ChipData {
 	const chipList = chips.toArray();
 	const name = toolbar.find<HTMLInputElement>('input.name').val() || '';
-	const id = toolbar.find<HTMLInputElement>('input.id').val() || name.toLowerCase().replaceAll(' ', '_');
+	const id = toolbar.find<HTMLInputElement>('input.id').val() || name.toLowerCase().replaceAll(/[\W\s]/g, '_');
 	const color = toolbar.find<HTMLInputElement>('input.color').val() || randomColor();
 
 	return {

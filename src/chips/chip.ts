@@ -6,9 +6,7 @@ import type { Pin } from '../pin.js';
 import { randomColor } from '../utils.js';
 
 export abstract class Chip extends Component {
-	declare ['constructor']: ChipMetadata & typeof Chip;
-
-	static color = randomColor();
+	declare ['constructor']: ChipMetadata & ChipLike;
 
 	static styles = css`
 		:host {
@@ -37,14 +35,11 @@ export abstract class Chip extends Component {
 		return new List(this.pins.toArray().filter(pin => !pin.isInput));
 	}
 
-	public constructor() {
-		super();
-		this.canMove = true;
-		this.style.backgroundColor = this.constructor.color;
-	}
+	protected canMove = true;
 
 	protected updated(_: Map<PropertyKey, unknown>): void {
 		super.updated(_);
+		this.style.backgroundColor = this.constructor.color || randomColor();
 		this.style.transform = `translate(${this.x}px, ${this.y}px)`;
 		for (const pin of this.pins) {
 			pin.requestUpdate();
@@ -74,6 +69,7 @@ export interface ChipMetadata {
 	id: string;
 	display: string;
 	builtin: boolean;
+	color?: string;
 	eval?(inputs: boolean[]): boolean[];
 }
 
@@ -86,7 +82,7 @@ export function register({ id, display, builtin = false, ...rest }: Partial<Chip
 		id ||= target.name.toLowerCase();
 		display ||= target.name;
 		customElements.define('sim-chip-' + id.replaceAll(':', '-'), target);
-		const _ = Object.assign(target, { id, display, builtin, ...rest });
+		const _ = Object.assign(target, { id, display, builtin, color: randomColor(), ...rest });
 		chips.set(id, _);
 		$('<option />')
 			.val(id)

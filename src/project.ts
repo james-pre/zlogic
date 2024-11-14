@@ -1,10 +1,10 @@
 import $ from 'jquery';
 import { download, upload } from 'utilium/dom.js';
-import { register } from './chips/chip.js';
+import { chips, register } from './chips/chip.js';
 import * as editor from './editor.js';
 import { version, type ChipData, type ProjectFile } from './static.js';
 import { popup } from './utils.js';
-import { CustomChip } from './chips/custom.js';
+import { chip_compile, chip_link, CustomChip, type ChipEval } from './chips/custom.js';
 
 let currentProject: ProjectFile | null;
 
@@ -15,7 +15,7 @@ export function create(name: string = ''): ProjectFile {
 		id: name.replaceAll(' ', '_'),
 		name,
 		chips: [],
-		editor: { id: '', name: '', chips: [], wires: [], color: '' },
+		editor: { id: '', name: '', chips: [], wires: [], color: '', code: '' },
 		state: { input: [] },
 	};
 
@@ -89,6 +89,19 @@ export function load(id: string) {
 	createUI(data);
 }
 
+function compileAndLink(chip: ChipData): ChipEval | undefined {
+	let exec: ChipEval | undefined;
+
+	try {
+		chip.code = chip_compile(chip);
+		exec = chip_link(chip.code, chip.id);
+	} catch (e) {
+		console.warn(`Failed to compile and link "${chip.id}":`, e);
+	}
+
+	return exec;
+}
+
 export function createChip(chip: ChipData) {
 	$('<li />')
 		.text(chip.name)
@@ -101,7 +114,9 @@ export function createChip(chip: ChipData) {
 	@register({
 		builtin: false,
 		id: chip.id,
+		color: chip.color,
 		display: chip.name,
+		eval: compileAndLink(chip),
 	})
 	class __CustomChip__ extends CustomChip {
 		static data = chip;
@@ -121,6 +136,14 @@ export function save() {
 			createChip(newChip);
 			currentProject.chips.push(newChip);
 		} else {
+			const NewChip = chips.get(newChip.id)!;
+			NewChip.color = newChip.color;
+			NewChip.eval = compileAndLink(newChip);
+			for (const chip of editor.chips) {
+				if (chip.constructor == NewChip) {
+					chip.requestUpdate();
+				}
+			}
 			currentProject.chips.splice(i, 1, newChip);
 		}
 	}

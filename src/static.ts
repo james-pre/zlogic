@@ -28,6 +28,7 @@ export interface ChipData {
 	color: string;
 	chips: SubChip[];
 	wires: WireData[];
+	code?: string;
 }
 
 export interface EditorState {
