@@ -152,6 +152,16 @@ export function save() {
 
 editor.toolbar.find<HTMLSelectElement>('button.save').on('click', save);
 
+$('#chip-upload').on('click', () => {
+	void upload('json', false)
+		.then(file => file.text())
+		.then(JSON.parse)
+		.then((chip: ChipData) => {
+			createChip(chip);
+			save();
+		});
+});
+
 $('#project-upload').on('click', () => {
 	void upload('json', false)
 		.then(file => file.text())
