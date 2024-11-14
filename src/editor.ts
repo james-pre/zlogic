@@ -25,9 +25,13 @@ export function clear(): void {
 }
 
 export function open(): void {
-	$('div.editor');
 	$('#editor-container .closed').hide();
 	$('#editor-container .open').show();
+}
+
+export function close(): void {
+	$('#editor-container .open').hide();
+	$('#editor-container .closed').show();
 }
 
 export const { left: x, top: y } = element.offset()!;

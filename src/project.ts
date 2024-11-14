@@ -38,6 +38,12 @@ export function open(project: ProjectFile) {
 	$('#menu .chips').show();
 }
 
+export function close() {
+	editor.close();
+	$('#menu .projects').show();
+	$('#menu .chips').hide();
+}
+
 export function parse(data_str: string | null): ProjectFile {
 	if (!data_str) throw 'Project does not exist.';
 
@@ -59,11 +65,18 @@ export function parse(data_str: string | null): ProjectFile {
 }
 
 export function createUI(project: ProjectFile): void {
-	$('<li />').html(`<p class="name">${project.name}</p>`).appendTo('.projects ul');
+	$('<li />')
+		.attr('id', prefix + project.id)
+		.html(`<p class="name">${project.name}</p>`)
+		.appendTo('.projects ul')
+		.on('click', () => {
+			open(project);
+		});
 }
 
 export function load(id: string) {
-	const project_str = localStorage.getItem('project:' + id);
+	if (!id.startsWith(prefix)) id = prefix + id;
+	const project_str = localStorage.getItem(id);
 
 	let data: ProjectFile;
 	try {
@@ -74,7 +87,6 @@ export function load(id: string) {
 	}
 
 	createUI(data);
-	open(data);
 }
 
 export function createChip(chip: ChipData) {
@@ -83,7 +95,7 @@ export function createChip(chip: ChipData) {
 		.appendTo('.chips ul')
 		.on('click', () => {
 			if (!currentProject) return;
-			editor.load(currentProject.chips.find(chip => chip.id == chip.id)!);
+			editor.load(currentProject.chips.find(({ id }) => id == chip.id)!);
 		});
 
 	@register({
@@ -96,7 +108,9 @@ export function createChip(chip: ChipData) {
 	}
 }
 
-editor.toolbar.find<HTMLSelectElement>('button.save').on('click', e => {
+const prefix = 'project~';
+
+export function save() {
 	if (!currentProject) return;
 	const newChip = editor.serialize();
 	const i = currentProject.chips.findIndex(chip => chip.id == newChip.id);
@@ -106,7 +120,10 @@ editor.toolbar.find<HTMLSelectElement>('button.save').on('click', e => {
 	} else {
 		currentProject.chips.splice(i, 1, newChip);
 	}
-});
+	localStorage.setItem(prefix + currentProject.id, JSON.stringify(currentProject));
+}
+
+editor.toolbar.find<HTMLSelectElement>('button.save').on('click', save);
 
 $('#project-upload').on('click', () => {
 	void upload('json', false)
@@ -115,6 +132,7 @@ $('#project-upload').on('click', () => {
 		.then(project => {
 			createUI(project);
 			open(project);
+			localStorage.setItem(prefix + project.id, JSON.stringify(project));
 		});
 });
 
@@ -124,3 +142,27 @@ $('#project-download').on('click', () => {
 	currentProject.state = editor.state();
 	download(JSON.stringify(currentProject), currentProject.id + '.json');
 });
+
+$('#project-delete').on('click', () => {
+	if (!currentProject) return;
+	void popup(true, 'Are you sure?')
+		.then(() => {
+			const { id } = currentProject!;
+			localStorage.removeItem(prefix + id);
+			$('#' + prefix + id).remove();
+			close();
+			currentProject = null;
+		})
+		.catch(e => {
+			if (e) {
+				console.error(e);
+			}
+		});
+});
+
+for (let i = 0; i < localStorage.length; i++) {
+	const key = localStorage.key(i);
+	if (key?.startsWith(prefix)) {
+		load(key);
+	}
+}

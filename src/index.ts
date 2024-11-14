@@ -5,7 +5,11 @@ import * as project from './project.js';
 import { popup } from './utils.js';
 
 $('#menu button.new').on('click', () => {
-	void popup(true, 'Project name: <input />').then(project.create).then(project.open);
+	void popup(true, 'Project name: <input />')
+		.then(project.create)
+		.then(project.open)
+		.then(project.save)
+		.catch(() => null);
 });
 
 $(document.body).on('keydown', e => {
@@ -18,5 +22,10 @@ $(document.body).on('keydown', e => {
 				$('#menu').css('width') == '0px' ? { width: '300px', 'padding-left': '1em', 'padding-right': '1em' } : { width: '0px', 'padding-left': 0, 'padding-right': 0 }
 			);
 			break;
+		case 's':
+			e.preventDefault();
+			project.save();
 	}
 });
+
+Object.assign(globalThis, { project });
