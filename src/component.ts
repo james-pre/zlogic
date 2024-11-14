@@ -26,7 +26,7 @@ export abstract class Component extends LitElement {
 
 	public remove(): void {
 		super.remove();
-		this.dispatchEvent(new Event('removed'));
+		this.dispatchEvent(new Event('remove'));
 	}
 
 	// Moving

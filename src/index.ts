@@ -2,6 +2,7 @@ import './styles.css';
 import './ui.css';
 import $ from 'jquery';
 import * as project from './project.js';
+import * as editor from './editor.js';
 import { popup } from './utils.js';
 
 $('#menu button.new').on('click', () => {
@@ -28,4 +29,4 @@ $(document.body).on('keydown', e => {
 	}
 });
 
-Object.assign(globalThis, { project });
+Object.assign(globalThis, { project, editor });

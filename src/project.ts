@@ -113,12 +113,16 @@ const prefix = 'project~';
 export function save() {
 	if (!currentProject) return;
 	const newChip = editor.serialize();
-	const i = currentProject.chips.findIndex(chip => chip.id == newChip.id);
-	if (i == -1) {
-		createChip(newChip);
-		currentProject.chips.push(newChip);
-	} else {
-		currentProject.chips.splice(i, 1, newChip);
+	currentProject.editor = newChip;
+	currentProject.state = editor.state();
+	if (newChip.id) {
+		const i = currentProject.chips.findIndex(chip => chip.id == newChip.id);
+		if (i == -1) {
+			createChip(newChip);
+			currentProject.chips.push(newChip);
+		} else {
+			currentProject.chips.splice(i, 1, newChip);
+		}
 	}
 	localStorage.setItem(prefix + currentProject.id, JSON.stringify(currentProject));
 }

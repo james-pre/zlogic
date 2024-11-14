@@ -13,11 +13,9 @@ export const element = $('#editor'),
 
 export function clear(): void {
 	for (const chip of chips) {
-		chips.delete(chip);
 		chip.remove();
 	}
 	for (const wire of wires) {
-		wires.delete(wire);
 		wire.remove();
 	}
 	toolbar.find('input').not('.color').val('');
@@ -46,6 +44,9 @@ export function addChip(id: string): Chip {
 	}
 
 	const subChip = new ChipCtor();
+	subChip.addEventListener('remove', () => {
+		chips.delete(subChip);
+	});
 	chips.add(subChip);
 	element.append(subChip);
 	return subChip;
@@ -72,8 +73,12 @@ let pendingWire: Wire | null;
 
 export function connectWire(pin: Pin) {
 	if (pendingWire) {
-		pendingWire.complete(pin);
-		wires.add(pendingWire);
+		const wire = pendingWire;
+		wire.complete(pin);
+		wire.addEventListener('remove', () => {
+			wires.delete(wire);
+		});
+		wires.add(wire);
 		pendingWire = null;
 	} else {
 		pendingWire = new Wire(pin);
@@ -122,6 +127,9 @@ export function load(data: ChipData): void {
 			wire.addAnchor(x, y);
 		}
 		wire.complete(chips.at(to[0]).inputs.at(to[1]));
+		wire.addEventListener('remove', () => {
+			wires.delete(wire);
+		});
 		wires.add(wire);
 		element.append(wire);
 	}
