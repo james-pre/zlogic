@@ -4,6 +4,7 @@ import { css, html } from 'lit';
 import { Chip, register } from './chip.js';
 import { Pin } from '../pin.js';
 import { colorState } from '../utils.js';
+import $ from 'jquery';
 
 /**
  * @internal
@@ -23,6 +24,14 @@ export class IO extends Chip {
 		:host([dragging]) {
 			cursor: grabbing;
 		}
+
+		div.connector {
+			position: absolute;
+			top: calc(50% - 0.125em);
+			width: 0.5em;
+			height: 0.25em;
+			background-color: #666;
+		}
 	`;
 
 	public readonly pin: Pin;
@@ -40,6 +49,10 @@ export class IO extends Chip {
 	public updated(_: Map<PropertyKey, unknown>): void {
 		super.updated(_);
 		this.style.backgroundColor = colorState(this.pin.state);
+
+		$(this.shadowRoot!)
+			.find('div.connector')
+			.css(this.pin.isInput ? 'left' : 'right', '-0.5em');
 	}
 
 	public Update(): void {}
@@ -47,6 +60,7 @@ export class IO extends Chip {
 	public render() {
 		return html`
 			<p>${this.name}</p>
+			<div class="connector"></div>
 			${this.pins.toArray()}
 		`;
 	}

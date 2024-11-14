@@ -54,3 +54,5 @@ export interface ChipFile {
 export type FileData = ProjectFile | ChipFile;
 
 export const version = 0;
+
+export const chipHeightScaling = 2;

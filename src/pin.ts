@@ -5,6 +5,7 @@ import { Component } from './component.js';
 import { connectWire, element } from './editor.js';
 import type { Wire } from './wire.js';
 import { colorState } from './utils.js';
+import { chipHeightScaling } from './static.js';
 
 @customElement('sim-pin')
 export class Pin extends Component {
@@ -66,20 +67,18 @@ export class Pin extends Component {
 			wire.requestUpdate();
 		}
 
-		const chipStyle = getComputedStyle(this.chip);
-
 		if (this.isTop) {
-			this.style.transform = `translate(${this.isInput ? '-1.5em' : `calc(${chipStyle.width} + 0.5em)`})`;
+			this.style[this.isInput ? 'left' : 'right'] = '-1.5em';
+			this.style.top = 'calc(50% - 0.5em)';
 			return;
 		}
 
 		const pins = this.isInput ? this.chip.inputs : this.chip.outputs;
 		const index = pins.toArray().indexOf(this);
 
-		const x = this.isInput ? '-0.5em' : `calc(${chipStyle.width} - 0.5em)`,
-			y = `calc(${(index - (pins.size - 1) / 2) * 20}px - calc(${chipStyle.height} / 2))`;
-
-		this.style.transform = `translate(${x}, ${y})`;
+		this.style[this.isInput ? 'left' : 'right'] = '-0.5em';
+		const offset = !(pins.size % 2) ? index * chipHeightScaling : index * chipHeightScaling;
+		this.style.top = offset + 'em';
 	}
 
 	public Update(): void {

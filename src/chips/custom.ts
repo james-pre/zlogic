@@ -1,5 +1,6 @@
+import { List } from 'utilium';
 import { Pin } from '../pin.js';
-import type { ChipData } from '../static.js';
+import type { ChipData, SubChip } from '../static.js';
 import { Chip, chips, type ChipLike, type ChipMetadata } from './chip.js';
 
 export type CustomStaticLike = ChipMetadata & ChipLike & { data: ChipData };
@@ -66,8 +67,8 @@ export function chip_eval(kind: string, input_values: boolean[], _debug: boolean
 	const evaluatedSubChips: Set<number> = new Set();
 
 	// Identify input and output sub-chips
-	const inputIndices = new Set<number>();
-	const outputIndices = new Set<number>();
+	const inputIndices = new List<number>();
+	const outputIndices = new List<number>();
 
 	for (const [i, subChip] of data.chips.entries()) {
 		if (subChip.kind === 'input') {
@@ -89,17 +90,17 @@ export function chip_eval(kind: string, input_values: boolean[], _debug: boolean
 	}
 
 	// Initialize inputs for "input" kind sub-chips, allowing multiple inputs
-	for (const [i, value] of input_values.entries()) {
-		if (data.chips[i]?.kind == 'input') {
-			if (_debug) console.debug('init input', i);
-			const chipInputs = subChips.get(i) || [];
-			chipInputs.push(value);
-			subChips.set(i, chipInputs);
-		}
+	for (let iV = 0; iV < inputIndices.size; iV++) {
+		const iC = inputIndices.at(iV);
+
+		if (_debug) console.debug('init input', iV, iC);
+		const chipInputs = subChips.get(iC) || [];
+		chipInputs.push(input_values[iV]);
+		subChips.set(iC, chipInputs);
 	}
 
 	// Process wires to propagate values
-	let currentSubChips = new Set<number>(Array.from(inputIndices));
+	let currentSubChips = new Set<number>(inputIndices);
 
 	let depth = 0;
 
@@ -157,6 +158,43 @@ export function chip_eval(kind: string, input_values: boolean[], _debug: boolean
 }
 
 /**
+ * Sorts sub-chips based on dependency
+ */
+export function chip_sort_sub(data: ChipData): [number, SubChip][] {
+	const dependencies = new Map<number, Set<number>>();
+	const dependentOn = new Map<number, Set<number>>();
+
+	for (const i of data.chips.keys()) {
+		dependencies.set(i, new Set());
+		dependentOn.set(i, new Set());
+	}
+
+	for (const { from, to } of data.wires) {
+		dependencies.get(from[0])!.add(to[0]);
+		dependentOn.get(to[0])!.add(from[0]);
+	}
+
+	// Step 2: Topologically sort sub-chips using Kahn's Algorithm
+	const sorted: [number, SubChip][] = [];
+	const noDependencyNodes: number[] = Array.from(dependencies.keys()).filter(i => !dependentOn.get(i)!.size);
+
+	while (noDependencyNodes.length > 0) {
+		const node = noDependencyNodes.shift()!;
+		sorted.push([node, data.chips[node]]);
+
+		for (const dependent of dependencies.get(node)!) {
+			const deps = dependentOn.get(dependent)!;
+			deps.delete(node);
+			if (!deps.size) {
+				noDependencyNodes.push(dependent);
+			}
+		}
+	}
+
+	return sorted;
+}
+
+/**
  * "Compiles" the chip into a JS sub-set
  */
 export function chip_compile(chip: ChipData | (ChipLike & ChipMetadata), pretty: boolean = false): string {
@@ -183,7 +221,7 @@ export function chip_compile(chip: ChipData | (ChipLike & ChipMetadata), pretty:
 
 	// Compile code for each sub-chip and wiring
 	let counter = 0;
-	for (const [i, { kind }] of data.chips.entries()) {
+	for (const [i, { kind }] of chip_sort_sub(data)) {
 		// Skip "input" kind chips, as they are already mapped
 		if (kind == 'input') continue;
 
@@ -196,12 +234,12 @@ export function chip_compile(chip: ChipData | (ChipLike & ChipMetadata), pretty:
 			.filter(wire => wire.to[0] == i)
 			.map(wire => {
 				const binding = bindings.get(wire.from[0]);
-				return binding?.startsWith('$in') || kind == 'output' ? binding : `${binding}[${wire.from[1]}]`;
+				return binding?.startsWith('$in') ? binding : `${binding}[${wire.from[1]}]`;
 			})
 			.join(sep);
 
 		if (kind == 'output') {
-			code += binding + (pretty ? ' = ' : '=') + inputs + end;
+			bindings.set(i, inputs);
 			continue;
 		}
 
@@ -213,7 +251,7 @@ export function chip_compile(chip: ChipData | (ChipLike & ChipMetadata), pretty:
 		.map((subChip, i) => {
 			if (subChip.kind == 'output') {
 				const binding = bindings.get(i);
-				return binding ? `${binding}[0]` : null; // Access the first element if binding exists
+				return binding ? binding : null; // Access the first element if binding exists
 			}
 			return null;
 		})
@@ -234,7 +272,7 @@ const id = String.raw`\$(\d+|in)`;
 const index = String.raw`(\[\d+\])?`;
 const args = String.raw`${id}${index}(,\s*${id}${index})+`;
 
-const intRegex = new RegExp(String.raw`^(return\s*\[${args}\])|(${id}\s*=\s*((\w+\(${args}\))|${id}))$`);
+const intRegex = new RegExp(String.raw`^(return\s*\[${args}\])|(${id}\s*=\s*(([\w_]+\(${args}\))|${id}))$`);
 
 /**
  * Turns the compiled JS sub-set code into an executable JS function.
@@ -264,4 +302,4 @@ export function chip_link(code: string, id?: string): ChipEval {
 	return (inputs: boolean[]) => __eval(inputs, _chips);
 }
 
-Object.assign(globalThis, { chip_compile, chip_link });
+Object.assign(globalThis, { chip_compile, chip_link, chip_sort_sub });

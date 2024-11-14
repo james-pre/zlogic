@@ -53,7 +53,7 @@ export abstract class Component extends LitElement {
 	}
 
 	private onMouseDown = (event: MouseEvent) => {
-		if (!this.canMove) return;
+		if (!this.canMove || event.button != 0) return;
 		this.dragging = true;
 		this.offsetX = event.clientX - this.x;
 		this.offsetY = event.clientY - this.y;

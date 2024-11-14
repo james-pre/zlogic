@@ -4,6 +4,7 @@ import { List } from 'utilium';
 import { Component } from '../component.js';
 import type { Pin } from '../pin.js';
 import { randomColor } from '../utils.js';
+import { chipHeightScaling } from '../static.js';
 
 export abstract class Chip extends Component {
 	declare ['constructor']: ChipMetadata & ChipLike;
@@ -41,6 +42,9 @@ export abstract class Chip extends Component {
 		super.updated(_);
 		this.style.backgroundColor = this.constructor.color || randomColor();
 		this.style.transform = `translate(${this.x}px, ${this.y}px)`;
+		const { inputs, outputs } = Object.groupBy(this.pins, pin => (pin.isInput ? 'inputs' : 'outputs'));
+		const maxOnSide = Math.max(inputs?.length || 0, outputs?.length || 0);
+		this.style.minHeight = maxOnSide * chipHeightScaling - 1 + 'em';
 		for (const pin of this.pins) {
 			pin.requestUpdate();
 		}
