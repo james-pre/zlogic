@@ -2,7 +2,7 @@ import $ from 'jquery';
 import { download, upload } from 'utilium/dom.js';
 import { chips, register } from './chips/chip.js';
 import * as editor from './editor.js';
-import { version, type ChipData, type ProjectFile } from './static.js';
+import { version, type ChipData, type ChipFile, type ProjectFile } from './static.js';
 import { popup } from './utils.js';
 import { chip_compile, chip_link, CustomChip, type ChipEval } from './chips/custom.js';
 
@@ -156,8 +156,10 @@ $('#chip-upload').on('click', () => {
 	void upload('json', false)
 		.then(file => file.text())
 		.then(JSON.parse)
-		.then((chip: ChipData) => {
-			createChip(chip);
+		.then((file: ChipFile) => {
+			if (!currentProject) return;
+			createChip(file.chip);
+			currentProject.chips.push(file.chip);
 			save();
 		});
 });
