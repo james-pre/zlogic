@@ -96,9 +96,9 @@ element.on('click', e => {
 		let anchorX = e.clientX - left;
 		let anchorY = e.clientY - top;
 
-		if (e.shiftKey && pendingWire.anchors.length > 0) {
+		if (e.shiftKey && pendingWire.anchors.size > 0) {
 			// Snapping logic: Snap along the nearest axis (x or y)
-			const lastAnchor = pendingWire.anchors.at(-1)!;
+			const lastAnchor = pendingWire.anchors.at(-1);
 
 			if (Math.abs(anchorX - lastAnchor.x) > Math.abs(anchorY - lastAnchor.y)) {
 				anchorY = lastAnchor.y;
@@ -159,7 +159,7 @@ export function serialize(): ChipData {
 			return {
 				from: [chipList.indexOf(in_chip), in_pin],
 				to: [chipList.indexOf(out_chip), out_pin],
-				anchors: wire.anchors.map(a => [+a.x.toFixed(), +a.y.toFixed()]),
+				anchors: wire.anchors.toArray().map(a => [+a.x.toFixed(), +a.y.toFixed()]),
 			};
 		}),
 	};

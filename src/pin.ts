@@ -34,14 +34,21 @@ export class Pin extends Component {
 		 */
 		public isTop: boolean = false
 	) {
-		super();
+		super({ canMove: isTop });
 		chip.pins.add(this);
-		this.canMove = isTop;
 
 		this.addEventListener('click', (e: MouseEvent) => {
 			connectWire(this);
 			e.stopPropagation();
 		});
+	}
+
+	public override get x(): number {
+		return this.offsets().x;
+	}
+
+	public override get y(): number {
+		return this.offsets().y;
 	}
 
 	public set(state: boolean): void {

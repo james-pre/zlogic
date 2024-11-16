@@ -10,29 +10,32 @@ import $ from 'jquery';
  * @internal
  */
 export class IO extends Chip {
-	static styles = css`
-		:host {
-			position: absolute;
-			min-width: 2em;
-			min-height: 2em;
-			aspect-ratio: 1;
-			border-radius: 50%;
-			transform-origin: center;
-			border: 3px solid #555;
-		}
+	static styles = [
+		Chip.styles,
+		css`
+			:host {
+				position: absolute;
+				min-width: 2em;
+				min-height: 2em;
+				aspect-ratio: 1;
+				border-radius: 50%;
+				transform-origin: center;
+				border: 3px solid #555;
+			}
 
-		:host([dragging]) {
-			cursor: grabbing;
-		}
+			:host([dragging]) {
+				cursor: grabbing;
+			}
 
-		div.connector {
-			position: absolute;
-			top: calc(50% - 0.125em);
-			width: 0.5em;
-			height: 0.25em;
-			background-color: #666;
-		}
-	`;
+			div.connector {
+				position: absolute;
+				top: calc(50% - 0.125em);
+				width: 0.5em;
+				height: 0.25em;
+				background-color: #666;
+			}
+		`,
+	];
 
 	public readonly pin: Pin;
 

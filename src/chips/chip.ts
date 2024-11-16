@@ -9,22 +9,21 @@ import { chipHeightScaling } from '../static.js';
 export abstract class Chip extends Component {
 	declare ['constructor']: ChipMetadata & ChipLike;
 
-	static styles = css`
-		:host {
-			position: absolute;
-			min-width: 1em;
-			min-height: 1em;
-			border-radius: 0.25em;
-		}
+	static styles = [
+		Component.styles,
+		css`
+			:host {
+				position: absolute;
+				min-width: 1em;
+				min-height: 1em;
+				border-radius: 0.25em;
+			}
 
-		:host([dragging]) {
-			cursor: grabbing;
-		}
-
-		p {
-			margin: 1em;
-		}
-	`;
+			p {
+				margin: 1em;
+			}
+		`,
+	];
 
 	public pins = new List<Pin>();
 
@@ -36,12 +35,14 @@ export abstract class Chip extends Component {
 		return new List(this.pins.toArray().filter(pin => !pin.isInput));
 	}
 
-	protected canMove = true;
+	public constructor() {
+		super({ canMove: true, autoPosition: true });
+	}
 
 	protected updated(_: Map<PropertyKey, unknown>): void {
 		super.updated(_);
 		this.style.backgroundColor = this.constructor.color || randomColor();
-		this.style.transform = `translate(${this.x}px, ${this.y}px)`;
+
 		const { inputs, outputs } = Object.groupBy(this.pins, pin => (pin.isInput ? 'inputs' : 'outputs'));
 		const maxOnSide = Math.max(inputs?.length || 0, outputs?.length || 0);
 		this.style.minHeight = maxOnSide * chipHeightScaling - 1 + 'em';

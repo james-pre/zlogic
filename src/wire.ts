@@ -1,14 +1,57 @@
-import { css, html } from 'lit';
+import { css, html, type PropertyValues } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { Component } from './component.js';
 import type { Pin } from './pin.js';
 import { colorState } from './utils.js';
+import { List } from 'utilium';
 
 @customElement('sim-anchor')
 export class WireAnchor extends Component {
-	protected canMove = true;
+	public static styles = [
+		Component.styles,
+		css`
+			:host {
+				width: 0;
+				height: 0;
+				overflow: visible;
+				position: absolute;
+				transform-origin: center;
+				pointer-events: all;
+			}
+
+			div {
+				min-width: 1em;
+				min-height: 1em;
+				left: -0.5em;
+				top: -0.5em;
+				position: relative;
+			}
+		`,
+	];
+
+	public constructor(protected wire: Wire) {
+		super({
+			canMove: true,
+			autoPosition: true,
+		});
+	}
 
 	public Update(): void {}
+
+	public remove(): void {
+		super.remove();
+		this.wire.anchors.delete(this);
+		this.wire.requestUpdate();
+	}
+
+	public updated(_: PropertyValues): void {
+		super.updated(_);
+		this.wire.requestUpdate();
+	}
+
+	public render() {
+		return html`<div></div>`;
+	}
 }
 
 @customElement('sim-wire')
@@ -19,9 +62,12 @@ export class Wire extends Component {
 			pointer-events: none;
 			width: 100%;
 			height: 100%;
+			display: contents;
 		}
 
 		svg {
+			pointer-events: none;
+			position: absolute;
 			width: 100%;
 			height: 100%;
 		}
@@ -32,7 +78,7 @@ export class Wire extends Component {
 		}
 	`;
 
-	@property() public accessor anchors: WireAnchor[] = [];
+	@property() public accessor anchors = new List<WireAnchor>();
 	@property() public accessor input: Pin;
 	@property() public accessor output: Pin | null = null;
 
@@ -54,10 +100,10 @@ export class Wire extends Component {
 	}
 
 	public addAnchor(x: number, y: number): void {
-		const anchor = new WireAnchor();
+		const anchor = new WireAnchor(this);
 		anchor.x = x;
 		anchor.y = y;
-		this.anchors.push(anchor);
+		this.anchors.add(anchor);
 		this.requestUpdate();
 	}
 
@@ -77,7 +123,7 @@ export class Wire extends Component {
 			// reverse
 			this.output = this.input;
 			this.input = output;
-			this.anchors.reverse();
+			this.anchors.toArray().reverse();
 		}
 
 		output.wires.add(this);
@@ -100,6 +146,6 @@ export class Wire extends Component {
 			path += `L ${x} ${y}`;
 		}
 
-		return html`<svg xmlns="http://www.w3.org/2000/svg"><path d="${path}" style="stroke:${colorState(this.input.state)}" /></svg>`;
+		return html`<svg xmlns="http://www.w3.org/2000/svg"><path d="${path}" style="stroke:${colorState(this.input.state)}" /></svg>${this.anchors}`;
 	}
 }
