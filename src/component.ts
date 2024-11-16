@@ -1,8 +1,18 @@
 import { css, LitElement, type CSSResult, type CSSResultGroup, type PropertyValues } from 'lit';
 import { property } from 'lit/decorators.js';
 import { randomID } from './utils.js';
+import $ from 'jquery';
 
 export type ComponentStyles = CSSResult | ComponentStyles[];
+
+export function eventPosition(event: MouseEvent): { x: number; y: number } {
+	const { left, top } = $('#editor').offset()!;
+
+	return {
+		x: event.clientX - left,
+		y: event.clientY - top,
+	};
+}
 
 export abstract class Component extends LitElement {
 	public static styles: CSSResultGroup = css`
@@ -31,6 +41,7 @@ export abstract class Component extends LitElement {
 		protected options: {
 			canMove?: boolean;
 			autoPosition?: boolean;
+			bubbleMouse?: boolean;
 		} = {}
 	) {
 		super();
@@ -42,7 +53,16 @@ export abstract class Component extends LitElement {
 			}
 		});
 
-		this.addEventListener('mousedown', this.onMouseDown);
+		this.addEventListener('mousedown', (event: MouseEvent) => {
+			if (!this.options.bubbleMouse) event.stopPropagation();
+			if (!this.options.canMove || event.button != 0) return;
+			this.dragging = true;
+			this.offsetX = event.clientX - this.x;
+			this.offsetY = event.clientY - this.y;
+			this.setAttribute('dragging', '');
+			document.addEventListener('mousemove', this.onMouseMove);
+			document.addEventListener('mouseup', this.onMouseUp);
+		});
 		this.addEventListener('mousemove', this.onMouseMove);
 		this.addEventListener('mouseup', this.onMouseUp);
 	}
@@ -63,17 +83,8 @@ export abstract class Component extends LitElement {
 		this.dispatchEvent(new Event('remove'));
 	}
 
-	private onMouseDown = (event: MouseEvent) => {
-		if (!this.options.canMove || event.button != 0) return;
-		this.dragging = true;
-		this.offsetX = event.clientX - this.x;
-		this.offsetY = event.clientY - this.y;
-		this.setAttribute('dragging', '');
-		document.addEventListener('mousemove', this.onMouseMove);
-		document.addEventListener('mouseup', this.onMouseUp);
-	};
-
 	private onMouseMove = (event: MouseEvent) => {
+		if (!this.options.bubbleMouse) event.stopPropagation();
 		if (!this.options.canMove || !this.dragging) return;
 
 		const newX = event.clientX - this.offsetX;
@@ -83,7 +94,8 @@ export abstract class Component extends LitElement {
 		this.y = newY;
 	};
 
-	private onMouseUp = () => {
+	private onMouseUp = (event: MouseEvent) => {
+		if (!this.options.bubbleMouse) event.stopPropagation();
 		if (!this.options.canMove || !this.dragging) return;
 
 		this.dragging = false;

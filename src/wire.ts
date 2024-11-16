@@ -1,9 +1,10 @@
+import $ from 'jquery';
 import { css, html, type PropertyValues } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { Component } from './component.js';
+import { List } from 'utilium';
+import { Component, eventPosition } from './component.js';
 import type { Pin } from './pin.js';
 import { colorState } from './utils.js';
-import { List } from 'utilium';
 
 @customElement('sim-anchor')
 export class WireAnchor extends Component {
@@ -33,6 +34,10 @@ export class WireAnchor extends Component {
 		super({
 			canMove: true,
 			autoPosition: true,
+		});
+
+		this.addEventListener('click', e => {
+			e.stopPropagation();
 		});
 	}
 
@@ -72,9 +77,10 @@ export class Wire extends Component {
 			height: 100%;
 		}
 
-		path {
+		line {
+			pointer-events: stroke;
 			fill: none;
-			stroke-width: 2;
+			stroke-width: 5;
 		}
 	`;
 
@@ -133,19 +139,33 @@ export class Wire extends Component {
 	}
 
 	public render() {
-		const { x, y } = this.input.offsets();
+		const parts = [this.input.offsets(), ...this.anchors, this.output ? this.output.offsets() : null];
 
-		let path = `M ${x} ${y}`;
+		const paths: SVGLineElement[] = [];
 
-		for (const { x, y } of this.anchors) {
-			path += `L ${x} ${y}`;
+		for (let i = 1; i < parts.length; i++) {
+			const start = parts[i - 1],
+				end = parts[i];
+			if (!start || !end) continue;
+
+			const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+
+			$(line).attr({
+				stroke: colorState(this.input.state),
+				x1: start.x,
+				y1: start.y,
+				x2: end.x,
+				y2: end.y,
+			});
+
+			line.addEventListener('click', event => {
+				if (event.button != 0) return;
+				const { x, y } = eventPosition(event);
+				console.log('clicked segment', i - 1, { x, y });
+			});
+			paths.push(line);
 		}
 
-		if (this.output) {
-			const { x, y } = this.output.offsets();
-			path += `L ${x} ${y}`;
-		}
-
-		return html`<svg xmlns="http://www.w3.org/2000/svg"><path d="${path}" style="stroke:${colorState(this.input.state)}" /></svg>${this.anchors}`;
+		return html`<svg xmlns="http://www.w3.org/2000/svg">${paths}</svg>${this.anchors}`;
 	}
 }
