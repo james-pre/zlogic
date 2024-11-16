@@ -2,6 +2,7 @@ import { css, LitElement, type CSSResult, type CSSResultGroup, type PropertyValu
 import { property } from 'lit/decorators.js';
 import { randomID } from './utils.js';
 import $ from 'jquery';
+import { resolveConstructors } from 'utilium';
 
 export type ComponentStyles = CSSResult | ComponentStyles[];
 
@@ -65,6 +66,10 @@ export abstract class Component extends LitElement {
 		});
 		this.addEventListener('mousemove', this.onMouseMove);
 		this.addEventListener('mouseup', this.onMouseUp);
+	}
+
+	public isKind<T extends Component>(kind: string): this is T {
+		return resolveConstructors(this).includes(kind);
 	}
 
 	/**

@@ -81,6 +81,7 @@ export class Wire extends Component {
 			pointer-events: stroke;
 			fill: none;
 			stroke-width: 5;
+			stroke-linecap: round;
 		}
 	`;
 
@@ -114,6 +115,10 @@ export class Wire extends Component {
 	}
 
 	protected isCompleted: boolean = false;
+
+	public lastItem(): WireAnchor | Pin {
+		return this.anchors.size ? this.anchors.at(-1) : this.input;
+	}
 
 	public complete(output: Pin): void {
 		if (this.isCompleted) {

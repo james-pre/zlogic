@@ -37,10 +37,7 @@ export class Pin extends Component {
 		super({ canMove: isTop });
 		chip.pins.add(this);
 
-		this.addEventListener('click', (e: MouseEvent) => {
-			connectWire(this);
-			e.stopPropagation();
-		});
+		this.addEventListener('click', connectWire.bind(this));
 	}
 
 	public override get x(): number {

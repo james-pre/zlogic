@@ -47,9 +47,7 @@ export function addChip(id: string): Chip {
 	}
 
 	const subChip = new ChipCtor();
-	subChip.addEventListener('remove', () => {
-		chips.delete(subChip);
-	});
+	subChip.addEventListener('remove', () => chips.delete(subChip));
 	chips.add(subChip);
 	element.append(subChip);
 	return subChip;
@@ -74,19 +72,22 @@ toolbar.find<HTMLSelectElement>('select.add').on('change', e => {
 
 let pendingWire: Wire | null;
 
-export function connectWire(pin: Pin) {
-	if (pendingWire) {
-		const wire = pendingWire;
-		wire.complete(pin);
-		wire.addEventListener('remove', () => {
-			wires.delete(wire);
-		});
-		wires.add(wire);
-		pendingWire = null;
-	} else {
-		pendingWire = new Wire(pin);
+export function connectWire(this: Pin, event: MouseEvent) {
+	event.stopPropagation();
+	if (!pendingWire) {
+		pendingWire = new Wire(this);
 		element.append(pendingWire);
+		return;
 	}
+	const wire = pendingWire; // alias for in the event listener
+	const last = wire.lastItem();
+	if (event.shiftKey && !last.isKind<Pin>('Pin')) {
+		last.y = this.offsets().y;
+	}
+	wire.complete(this);
+	wire.addEventListener('remove', () => wires.delete(wire));
+	wires.add(wire);
+	pendingWire = null;
 }
 
 element.on('click', e => {
@@ -96,14 +97,14 @@ element.on('click', e => {
 		let anchorX = e.clientX - left;
 		let anchorY = e.clientY - top;
 
-		if (e.shiftKey && pendingWire.anchors.size > 0) {
+		if (e.shiftKey) {
 			// Snapping logic: Snap along the nearest axis (x or y)
-			const lastAnchor = pendingWire.anchors.at(-1);
+			const last = pendingWire.lastItem();
 
-			if (Math.abs(anchorX - lastAnchor.x) > Math.abs(anchorY - lastAnchor.y)) {
-				anchorY = lastAnchor.y;
+			if (Math.abs(anchorX - last.x) > Math.abs(anchorY - last.y)) {
+				anchorY = last.y;
 			} else {
-				anchorX = lastAnchor.x;
+				anchorX = last.x;
 			}
 		}
 
