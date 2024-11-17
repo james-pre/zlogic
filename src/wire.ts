@@ -125,6 +125,9 @@ export class Wire extends Component {
 		super.remove();
 		this.input.wires.delete(this);
 		this.output?.wires.delete(this);
+		for (const anchor of this.anchors) {
+			anchor.remove();
+		}
 	}
 
 	public addAnchor(x: number, y: number): void {

@@ -150,7 +150,7 @@ export function load(data: ChipData): void {
 
 export function serialize(): ChipData {
 	const chipArray = chips.toArray(),
-		anchorArray = anchors.toArray();
+		anchorArray = anchors.toArray().filter(a => a.wires.size);
 	const name = toolbar.find<HTMLInputElement>('input.name').val() || '';
 	const id = toolbar.find<HTMLInputElement>('input.id').val() || name.toLowerCase().replaceAll(/[\W\s]/g, '_');
 	const color = toolbar.find<HTMLInputElement>('input.color').val() || randomColor();
