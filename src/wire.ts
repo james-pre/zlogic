@@ -30,11 +30,16 @@ export class WireAnchor extends Component {
 		`,
 	];
 
-	public constructor(protected wire: Wire) {
+	public wires = new Set<Wire>();
+
+	public constructor(x: number, y: number) {
 		super({
 			canMove: true,
 			autoPosition: true,
 		});
+
+		this.x = x;
+		this.y = y;
 
 		this.addEventListener('click', e => {
 			e.stopPropagation();
@@ -45,13 +50,17 @@ export class WireAnchor extends Component {
 
 	public remove(): void {
 		super.remove();
-		this.wire.anchors.delete(this);
-		this.wire.requestUpdate();
+		for (const wire of this.wires) {
+			wire.anchors.delete(this);
+		}
+		this.requestUpdate();
 	}
 
 	public updated(_: PropertyValues): void {
 		super.updated(_);
-		this.wire.requestUpdate();
+		for (const wire of this.wires) {
+			wire.requestUpdate();
+		}
 	}
 
 	public render() {
@@ -107,9 +116,8 @@ export class Wire extends Component {
 	}
 
 	public addAnchor(x: number, y: number): void {
-		const anchor = new WireAnchor(this);
-		anchor.x = x;
-		anchor.y = y;
+		const anchor = new WireAnchor(x, y);
+		anchor.wires.add(this);
 		this.anchors.add(anchor);
 		this.requestUpdate();
 	}

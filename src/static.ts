@@ -11,9 +11,9 @@ export interface WireData {
 	to: [number, number];
 
 	/**
-	 * [x, y] list
+	 * list of references into the chip's anchors
 	 */
-	anchors: [number, number][];
+	anchors: number[];
 }
 
 export interface SubChip {
@@ -28,6 +28,7 @@ export interface ChipData {
 	color: string;
 	chips: SubChip[];
 	wires: WireData[];
+	anchors: [number, number][];
 	code?: string;
 }
 

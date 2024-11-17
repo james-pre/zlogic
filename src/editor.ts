@@ -6,7 +6,7 @@ import { Input } from './chips/index.js'; // Need side-effects
 import type { Pin } from './pin.js';
 import type { ChipData, ChipFile, EditorState } from './static.js';
 import { popup, randomColor } from './utils.js';
-import { Wire, removePendingWire, pendingWire, addPendingWire } from './wire.js';
+import { Wire, WireAnchor, removePendingWire, pendingWire, addPendingWire } from './wire.js';
 
 export const element = $('#editor'),
 	toolbar = $('#toolbar');
@@ -35,7 +35,8 @@ export function close(): void {
 export const { left: x, top: y } = element.offset()!;
 
 export const chips = new List<Chip>(),
-	wires = new List<Wire>();
+	wires = new List<Wire>(),
+	anchors = new List<WireAnchor>();
 
 export function addChip(id: string): Chip {
 	const ChipCtor = chipConstructors.get(id);
@@ -107,7 +108,12 @@ element.on('click', e => {
 			}
 		}
 
-		pendingWire.addAnchor(anchorX, anchorY);
+		const anchor = new WireAnchor(anchorX, anchorY);
+		anchor.addEventListener('remove', () => anchors.delete(anchor));
+		anchor.wires.add(pendingWire);
+		pendingWire.anchors.add(anchor);
+		pendingWire.requestUpdate();
+		anchors.add(anchor);
 	}
 });
 
@@ -123,23 +129,30 @@ export function load(data: ChipData): void {
 		chip.y = y;
 	}
 
-	for (const { from, to, anchors } of data.wires) {
+	for (const [x, y] of data.anchors) {
+		const anchor = new WireAnchor(x, y);
+		anchors.add(anchor);
+		anchor.addEventListener('remove', () => anchors.delete(anchor));
+	}
+
+	for (const { from, to, anchors: wireAnchors } of data.wires) {
 		const wire = new Wire(chips.at(from[0]).outputs.at(from[1]));
 
-		for (const [x, y] of anchors) {
-			wire.addAnchor(x, y);
+		for (const i of wireAnchors) {
+			const anchor = anchors.at(i);
+			wire.anchors.add(anchor);
+			anchor.wires.add(wire);
 		}
 		wire.complete(chips.at(to[0]).inputs.at(to[1]));
-		wire.addEventListener('remove', () => {
-			wires.delete(wire);
-		});
+		wire.addEventListener('remove', () => wires.delete(wire));
 		wires.add(wire);
 		element.append(wire);
 	}
 }
 
 export function serialize(): ChipData {
-	const chipList = chips.toArray();
+	const chipArray = chips.toArray(),
+		anchorArray = anchors.toArray();
 	const name = toolbar.find<HTMLInputElement>('input.name').val() || '';
 	const id = toolbar.find<HTMLInputElement>('input.id').val() || name.toLowerCase().replaceAll(/[\W\s]/g, '_');
 	const color = toolbar.find<HTMLInputElement>('input.color').val() || randomColor();
@@ -148,7 +161,8 @@ export function serialize(): ChipData {
 		id,
 		name,
 		color,
-		chips: chipList.map(chip => ({ kind: chip.constructor.id, x: chip.x, y: chip.y })),
+		chips: chipArray.map(chip => ({ kind: chip.constructor.id, x: chip.x, y: chip.y })),
+		anchors: anchorArray.map(a => [+a.x.toFixed(), +a.y.toFixed()]),
 		wires: wires.toArray().map(wire => {
 			const in_chip = wire.input.chip;
 			const in_pin = in_chip.outputs.toArray().indexOf(wire.input);
@@ -157,9 +171,9 @@ export function serialize(): ChipData {
 			const out_pin = out_chip.inputs.toArray().indexOf(wire.output!);
 
 			return {
-				from: [chipList.indexOf(in_chip), in_pin],
-				to: [chipList.indexOf(out_chip), out_pin],
-				anchors: wire.anchors.toArray().map(a => [+a.x.toFixed(), +a.y.toFixed()]),
+				from: [chipArray.indexOf(in_chip), in_pin],
+				to: [chipArray.indexOf(out_chip), out_pin],
+				anchors: wire.anchors.toArray().map(a => anchorArray.indexOf(a)),
 			};
 		}),
 	};
