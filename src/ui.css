@@ -42,6 +42,10 @@
 	li:hover {
 		cursor: pointer;
 	}
+
+	div {
+		margin-bottom: 1em;
+	}
 }
 
 #editor-container {

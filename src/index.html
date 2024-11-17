@@ -8,7 +8,6 @@
 	<body>
 		<div id="app">
 			<div id="menu">
-				<h1>Logic Simulator</h1>
 				<div class="projects">
 					<button class="new">+ New Project</button>
 					<button id="project-upload">Upload</button>
@@ -16,8 +15,15 @@
 					<ul></ul>
 				</div>
 				<div class="chips" style="display: none">
-					<button id="project-download">Download Project</button>
-					<button id="project-delete">Delete Project</button>
+					<h3>Project</h3>
+					<div>
+						<button id="project-download">Download</button>
+						<button id="project-delete">Delete</button>
+					</div>
+					<div>
+						<button id="project-close">Close</button>
+						<button id="project-rename">Rename</button>
+					</div>
 					<h3>Chips</h3>
 					<button id="chip-create">New Chip</button>
 					<button id="chip-upload">Upload Chip</button>
@@ -27,6 +33,7 @@
 
 			<div id="editor-container" tabindex="-1">
 				<div class="closed">
+					<h1>Logic Simulator</h1>
 					<p>Open a project to get started</p>
 				</div>
 
