@@ -37,7 +37,7 @@ export abstract class Component extends LitElement {
 	/**
 	 * Tracks information while moving
 	 */
-	private move?: {
+	protected move?: {
 		pastX: number;
 		pastY: number;
 		offX: number;
@@ -65,6 +65,7 @@ export abstract class Component extends LitElement {
 		this.addEventListener('mousedown', event => {
 			if (!this.options.bubbleMouse) event.stopPropagation();
 			if (!this.options.canMove || event.button != 0) return;
+
 			this.move = {
 				pastX: this.x,
 				pastY: this.y,
@@ -99,6 +100,7 @@ export abstract class Component extends LitElement {
 	public remove(): void {
 		super.remove();
 		this.dispatchEvent(new Event('remove'));
+		document.removeEventListener('keydown', this.onKeyDown);
 	}
 
 	protected stopMove(resetPosition: boolean) {
@@ -155,6 +157,5 @@ export abstract class Component extends LitElement {
 		super.disconnectedCallback();
 		document.removeEventListener('mousemove', this.onMouseMove);
 		document.removeEventListener('mouseup', this.onMouseUp);
-		document.removeEventListener('keydown', this.onKeyDown);
 	}
 }

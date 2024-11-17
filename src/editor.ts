@@ -7,6 +7,7 @@ import type { Pin } from './pin.js';
 import type { ChipData, ChipFile, EditorState } from './static.js';
 import { popup, randomColor } from './utils.js';
 import { Wire, WireAnchor, removePendingWire, pendingWire, addPendingWire } from './wire.js';
+import { eventPosition } from './component.js';
 
 export const element = $('#editor'),
 	toolbar = $('#toolbar');
@@ -31,8 +32,6 @@ export function close(): void {
 	$('#editor-container .open').hide();
 	$('#editor-container .closed').show();
 }
-
-export const { left: x, top: y } = element.offset()!;
 
 export const chips = new List<Chip>(),
 	wires = new List<Wire>(),
@@ -90,31 +89,30 @@ export function connectWire(this: Pin, event: MouseEvent) {
 	removePendingWire();
 }
 
-element.on('click', e => {
-	if (pendingWire && !(e.target instanceof Chip)) {
-		const { left, top } = element.offset()!;
-
-		let anchorX = e.clientX - left;
-		let anchorY = e.clientY - top;
-
-		if (e.shiftKey) {
-			// Snapping logic: Snap along the nearest axis (x or y)
-			const last = pendingWire.lastItem();
-
-			if (Math.abs(anchorX - last.x) > Math.abs(anchorY - last.y)) {
-				anchorY = last.y;
-			} else {
-				anchorX = last.x;
-			}
-		}
-
-		const anchor = new WireAnchor(anchorX, anchorY);
-		anchor.addEventListener('remove', () => anchors.delete(anchor));
-		anchor.wires.add(pendingWire);
-		pendingWire.anchors.add(anchor);
-		pendingWire.requestUpdate();
-		anchors.add(anchor);
+element.on('click', event => {
+	if (!pendingWire || event.target instanceof Chip) {
+		return;
 	}
+
+	let { x, y } = eventPosition(event.originalEvent!);
+
+	if (event.shiftKey) {
+		// Snapping logic: Snap along the nearest axis (x or y)
+		const last = pendingWire.lastItem();
+
+		if (Math.abs(x - last.x) > Math.abs(y - last.y)) {
+			y = last.y;
+		} else {
+			x = last.x;
+		}
+	}
+
+	const anchor = new WireAnchor(x, y);
+	anchor.addEventListener('remove', () => anchors.delete(anchor));
+	anchor.wires.add(pendingWire);
+	pendingWire.anchors.add(anchor);
+	pendingWire.requestUpdate();
+	anchors.add(anchor);
 });
 
 export function load(data: ChipData): void {

@@ -16,6 +16,7 @@ export class Pin extends Component {
 			border-radius: 50%;
 			width: 1em;
 			height: 1em;
+			z-index: 3;
 		}
 	`;
 

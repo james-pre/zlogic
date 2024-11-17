@@ -12,25 +12,20 @@ export class WireAnchor extends Component {
 		Component.styles,
 		css`
 			:host {
-				width: 0;
-				height: 0;
+				width: 1em;
+				height: 1em;
+				top: -0.5em;
+				left: -0.5em;
 				overflow: visible;
 				position: absolute;
 				transform-origin: center;
 				pointer-events: all;
-			}
-
-			div {
-				min-width: 1em;
-				min-height: 1em;
-				left: -0.5em;
-				top: -0.5em;
-				position: relative;
+				z-index: 2;
 			}
 		`,
 	];
 
-	public wires = new Set<Wire>();
+	public wires = new List<Wire>();
 
 	public constructor(x: number, y: number) {
 		super({
@@ -41,8 +36,24 @@ export class WireAnchor extends Component {
 		this.x = x;
 		this.y = y;
 
-		this.addEventListener('click', e => {
-			e.stopPropagation();
+		this.addEventListener('click', event => {
+			event.stopPropagation();
+			if (pendingWire) {
+				this.wires.add(pendingWire);
+				pendingWire.anchors.add(this);
+				return;
+			}
+
+			const anchors = this.wires.at(0).anchors.toArray();
+			const i = anchors.indexOf(this);
+			if (i == -1) return; // should not happen
+
+			addPendingWire(this.wires.at(0).input);
+
+			for (const anchor of anchors.slice(0, i + 1)) {
+				anchor.wires.add(pendingWire!);
+				pendingWire!.anchors.add(anchor);
+			}
 		});
 	}
 
@@ -64,7 +75,7 @@ export class WireAnchor extends Component {
 	}
 
 	public render() {
-		return html`<div></div>`;
+		return html``;
 	}
 }
 
@@ -77,6 +88,7 @@ export class Wire extends Component {
 			width: 100%;
 			height: 100%;
 			display: contents;
+			z-index: 1;
 		}
 
 		svg {
