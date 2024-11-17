@@ -174,3 +174,20 @@ export class Wire extends Component {
 		return html`<svg xmlns="http://www.w3.org/2000/svg">${paths}</svg>${this.anchors}`;
 	}
 }
+
+export let pendingWire: Wire | null;
+
+/**
+ * Creates a new pending wire if one does not already exist.
+ * @returns if a wire was created
+ */
+export function addPendingWire(pin: Pin): boolean {
+	if (pendingWire) return false;
+	pendingWire = new Wire(pin);
+	$('#editor').append(pendingWire);
+	return true;
+}
+
+export function removePendingWire() {
+	pendingWire = null;
+}

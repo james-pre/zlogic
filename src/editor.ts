@@ -6,7 +6,7 @@ import { Input } from './chips/index.js'; // Need side-effects
 import type { Pin } from './pin.js';
 import type { ChipData, ChipFile, EditorState } from './static.js';
 import { popup, randomColor } from './utils.js';
-import { Wire } from './wire.js';
+import { Wire, removePendingWire, pendingWire, addPendingWire } from './wire.js';
 
 export const element = $('#editor'),
 	toolbar = $('#toolbar');
@@ -70,24 +70,23 @@ toolbar.find<HTMLSelectElement>('select.add').on('change', e => {
 	e.target.value = '';
 });
 
-let pendingWire: Wire | null;
-
 export function connectWire(this: Pin, event: MouseEvent) {
 	event.stopPropagation();
-	if (!pendingWire) {
-		pendingWire = new Wire(this);
-		element.append(pendingWire);
-		return;
-	}
-	const wire = pendingWire; // alias for in the event listener
+	if (addPendingWire(this)) return;
+	const wire = pendingWire!; // alias for in the event listener
 	const last = wire.lastItem();
 	if (event.shiftKey && !last.isKind<Pin>('Pin')) {
-		last.y = this.offsets().y;
+		const { x, y } = this.offsets();
+		if (Math.abs(last.x - x) > Math.abs(last.y - y)) {
+			last.y = y;
+		} else {
+			last.x = x;
+		}
 	}
 	wire.complete(this);
 	wire.addEventListener('remove', () => wires.delete(wire));
 	wires.add(wire);
-	pendingWire = null;
+	removePendingWire();
 }
 
 element.on('click', e => {
