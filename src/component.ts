@@ -33,10 +33,18 @@ export abstract class Component extends LitElement {
 	public id: string = randomID();
 
 	// Moving
-	private dragging = false;
-	private offsetX = 0;
-	private offsetY = 0;
-	protected isMoved: boolean = false;
+
+	/**
+	 * Tracks information while moving
+	 */
+	private move?: {
+		pastX: number;
+		pastY: number;
+		offX: number;
+		offY: number;
+		lockedAxis?: 'x' | 'y';
+	};
+	protected hasMoved: boolean = false;
 
 	public constructor(
 		protected options: {
@@ -54,16 +62,21 @@ export abstract class Component extends LitElement {
 			}
 		});
 
-		this.addEventListener('mousedown', (event: MouseEvent) => {
+		this.addEventListener('mousedown', event => {
 			if (!this.options.bubbleMouse) event.stopPropagation();
 			if (!this.options.canMove || event.button != 0) return;
-			this.dragging = true;
-			this.offsetX = event.clientX - this.x;
-			this.offsetY = event.clientY - this.y;
+			this.move = {
+				pastX: this.x,
+				pastY: this.y,
+				offX: event.clientX - this.x,
+				offY: event.clientY - this.y,
+			};
+
 			this.setAttribute('dragging', '');
 			document.addEventListener('mousemove', this.onMouseMove);
 			document.addEventListener('mouseup', this.onMouseUp);
 		});
+		document.addEventListener('keydown', this.onKeyDown);
 		this.addEventListener('mousemove', this.onMouseMove);
 		this.addEventListener('mouseup', this.onMouseUp);
 	}
@@ -88,31 +101,60 @@ export abstract class Component extends LitElement {
 		this.dispatchEvent(new Event('remove'));
 	}
 
-	private onMouseMove = (event: MouseEvent) => {
-		if (!this.options.bubbleMouse) event.stopPropagation();
-		if (!this.options.canMove || !this.dragging) return;
+	protected stopMove(resetPosition: boolean) {
+		if (!this.options.canMove || !this.move) return;
 
-		const newX = event.clientX - this.offsetX;
-		const newY = event.clientY - this.offsetY;
-		this.isMoved ||= newX != this.x || newY != this.y;
+		if (resetPosition) {
+			this.x = this.move.pastX;
+			this.y = this.move.pastY;
+		}
+
+		this.move = undefined;
+		this.hasMoved = false;
+		this.removeAttribute('dragging');
+		document.removeEventListener('mousemove', this.onMouseMove);
+		document.removeEventListener('mouseup', this.onMouseUp);
+	}
+
+	protected moveTo(x: number, y: number) {
+		if (!this.options.canMove || !this.move) return;
+
+		const newX = this.move.lockedAxis == 'y' ? this.move.pastX : x;
+		const newY = this.move.lockedAxis == 'x' ? this.move.pastY : y;
+
+		this.hasMoved ||= newX != this.x || newY != this.y;
 		this.x = newX;
 		this.y = newY;
+	}
+
+	private onKeyDown = ({ key }: KeyboardEvent) => {
+		if (!this.move) return;
+
+		const { move } = this;
+
+		if (key == 'x' || key == 'y') {
+			move.lockedAxis = key != move.lockedAxis ? key : undefined;
+			if (move.lockedAxis) this.moveTo(this.x, this.y);
+		}
+
+		if (key == 'Escape') this.stopMove(true);
+	};
+
+	private onMouseMove = (event: MouseEvent) => {
+		if (!this.options.bubbleMouse) event.stopPropagation();
+		if (!this.move) return;
+		this.moveTo(event.clientX - this.move.offX, event.clientY - this.move.offY);
 	};
 
 	private onMouseUp = (event: MouseEvent) => {
 		if (!this.options.bubbleMouse) event.stopPropagation();
-		if (!this.options.canMove || !this.dragging) return;
-
-		this.dragging = false;
-		this.isMoved = false;
-		this.removeAttribute('dragging');
-		document.removeEventListener('mousemove', this.onMouseMove);
-		document.removeEventListener('mouseup', this.onMouseUp);
+		this.stopMove(false);
 	};
 
 	public disconnectedCallback() {
 		super.disconnectedCallback();
 		document.removeEventListener('mousemove', this.onMouseMove);
 		document.removeEventListener('mouseup', this.onMouseUp);
+		document.removeEventListener('keydown', this.onKeyDown);
 	}
 }

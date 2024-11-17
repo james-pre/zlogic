@@ -74,7 +74,7 @@ export class Input extends IO {
 	public constructor() {
 		super(false);
 		this.addEventListener('mouseup', e => {
-			if (e.target != this || this.isMoved || e.button == 1) return;
+			if (e.target != this || this.hasMoved || e.button == 1) return;
 			this.pin.set(!this.pin.state);
 			this.requestUpdate();
 		});
