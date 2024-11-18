@@ -46,6 +46,11 @@
 	div {
 		margin-bottom: 1em;
 	}
+
+	.bottom {
+		display: inline-flex;
+		margin: auto 0 0;
+	}
 }
 
 #editor-container {
