@@ -1,14 +1,10 @@
 {
-	"name": "logic-sim",
-	"globalName": "",
-	"version": "0.0.0-prototype",
-	"description": "A",
+	"name": "zlogic",
+	"version": "0.0.0",
+	"description": "A logic simulator",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"keywords": [],
-	"bin": {
-		"build": "scripts/build.js"
-	},
 	"files": [
 		"dist",
 		"src",
@@ -16,15 +12,15 @@
 		"tsconfig.json"
 	],
 	"type": "module",
-	"homepage": "https://github.com/james-pre/logic-sim",
+	"homepage": "https://github.com/james-pre/zlogic",
 	"author": "James Prevett <jp@jamespre.dev> (https://jamespre.dev)",
-	"license": "MIT",
+	"license": "AGPL-3.0-or-later",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/james-pre/logic-sim.git"
+		"url": "git+https://github.com/james-pre/zlogic.git"
 	},
 	"bugs": {
-		"url": "https://github.com/james-pre/logic-sim/issues"
+		"url": "https://github.com/james-pre/zlogic/issues"
 	},
 	"engines": {
 		"node": ">= 20"
