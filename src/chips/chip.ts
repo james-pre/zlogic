@@ -86,7 +86,7 @@ export function register({ id, display, builtin = false, ...rest }: Partial<Chip
 	return function <T extends ChipLike>(target: T): T & ChipMetadata {
 		id ||= target.name.toLowerCase();
 		display ||= target.name;
-		customElements.define('sim-chip-' + id.replaceAll(':', '-'), target);
+		customElements.define('sim-chip-' + Math.random().toString(16).slice(2), target);
 		const _ = Object.assign(target, { id, display, builtin, color: randomColor(), ...rest });
 		chips.set(id, _);
 		$('<option />')
