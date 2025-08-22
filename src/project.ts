@@ -199,6 +199,11 @@ $('#project-delete').on('click', () => {
 		});
 });
 
+$('#project-close').on('click', () => {
+	if (!currentProject) return;
+	close();
+});
+
 for (let i = 0; i < localStorage.length; i++) {
 	const key = localStorage.key(i);
 	if (key?.startsWith(prefix)) {
