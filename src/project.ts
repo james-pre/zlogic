@@ -42,6 +42,7 @@ export function close() {
 	editor.close();
 	$('#menu .projects').show();
 	$('#menu .chips').hide();
+	$('#chip-list').empty();
 }
 
 export function parse(data_str: string | null): ProjectFile {
