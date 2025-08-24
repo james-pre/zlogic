@@ -255,7 +255,7 @@ export function chip_compile(chip: ChipData | (ChipLike & ChipMetadata), pretty:
 			}
 			return null;
 		})
-		.filter(Boolean)
+		.filter(v => v)
 		.join(sep);
 
 	code += `return [${returned}]`;
