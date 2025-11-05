@@ -190,7 +190,7 @@ toolbar.find<HTMLSelectElement>('button.download').on('click', e => {
 		chip: serialize(),
 	};
 
-	download(JSON.stringify(chipFile), 'chip.json');
+	download('chip.json', JSON.stringify(chipFile));
 });
 
 toolbar.find('button.reset').on('click', clear);

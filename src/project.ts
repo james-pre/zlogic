@@ -180,7 +180,7 @@ $('#project-download').on('click', () => {
 	if (!currentProject) return;
 	currentProject.editor = editor.serialize();
 	currentProject.state = editor.state();
-	download(JSON.stringify(currentProject), currentProject.id + '.json');
+	download(currentProject.id + '.json', JSON.stringify(currentProject));
 });
 
 $('#project-delete').on('click', () => {
