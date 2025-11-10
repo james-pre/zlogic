@@ -1,10 +1,10 @@
 import $ from 'jquery';
 import { css, html } from 'lit';
-import { List } from 'utilium';
+import { List, pick } from 'utilium';
 import { Component } from '../component.js';
 import type { Pin } from '../pin.js';
+import { chipHeightScaling, type SubChip } from '../static.js';
 import { randomColor } from '../utils.js';
-import { chipHeightScaling } from '../static.js';
 
 export abstract class Chip extends Component {
 	declare ['constructor']: ChipMetadata & ChipLike;
@@ -67,6 +67,16 @@ export abstract class Chip extends Component {
 			<p>${ctor.display || ctor.name}</p>
 			${this.pins.toArray()}
 		`;
+	}
+
+	public toJSON(): SubChip {
+		const data: SubChip = {
+			...pick(this, 'x', 'y'),
+			kind: this.constructor.id,
+		};
+
+		if ('label' in this && this.label) data.label = this.label;
+		return data;
 	}
 }
 

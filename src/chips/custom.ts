@@ -12,9 +12,9 @@ export class CustomChip extends Chip {
 		super();
 
 		for (const chip of this.constructor.data.chips) {
-			if (chip.kind == 'input' || chip.kind == 'output') {
-				new Pin(this, chip.kind == 'input', false);
-			}
+			if (chip.kind != 'input' && chip.kind != 'output') continue;
+			const pin = new Pin(this, chip.kind == 'input', false);
+			if (chip.label) pin.label = chip.label;
 		}
 	}
 

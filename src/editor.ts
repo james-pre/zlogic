@@ -121,10 +121,9 @@ export function load(data: ChipData): void {
 	toolbar.find('input.name').val(data.name);
 	toolbar.find('input.color').val(data.color);
 
-	for (const { kind, x, y } of data.chips) {
+	for (const { kind, ...rest } of data.chips) {
 		const chip = addChip(kind);
-		chip.x = x;
-		chip.y = y;
+		Object.assign(chip, rest);
 	}
 
 	for (const [x, y] of data.anchors) {
@@ -159,7 +158,7 @@ export function serialize(): ChipData {
 		id,
 		name,
 		color,
-		chips: chipArray.map(chip => ({ kind: chip.constructor.id, x: chip.x, y: chip.y })),
+		chips: chipArray.map(chip => chip.toJSON()),
 		anchors: anchorArray.map(a => [+a.x.toFixed(), +a.y.toFixed()]),
 		wires: wires.toArray().map(wire => {
 			const in_chip = wire.input.chip;

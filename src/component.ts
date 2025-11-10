@@ -23,9 +23,10 @@ export abstract class Component extends LitElement {
 	`;
 
 	/**
-	 * User-facing name of the component
+	 * User-facing label of a component "instance"
+	 * Currently only used for I/O pins.
 	 */
-	@property() public accessor name = '';
+	@property() public accessor label = '';
 
 	@property() public accessor x: number = 0;
 	@property() public accessor y: number = 0;
@@ -74,10 +75,10 @@ export abstract class Component extends LitElement {
 			};
 
 			this.setAttribute('dragging', '');
-			document.addEventListener('mousemove', this.onMouseMove);
-			document.addEventListener('mouseup', this.onMouseUp);
 		});
 		document.addEventListener('keydown', this.onKeyDown);
+		document.addEventListener('mousemove', this.onMouseMove);
+		document.addEventListener('mouseup', this.onMouseUp);
 		this.addEventListener('mousemove', this.onMouseMove);
 		this.addEventListener('mouseup', this.onMouseUp);
 	}
@@ -114,8 +115,6 @@ export abstract class Component extends LitElement {
 		this.move = undefined;
 		this.hasMoved = false;
 		this.removeAttribute('dragging');
-		document.removeEventListener('mousemove', this.onMouseMove);
-		document.removeEventListener('mouseup', this.onMouseUp);
 	}
 
 	protected moveTo(x: number, y: number) {

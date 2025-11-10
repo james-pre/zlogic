@@ -1,4 +1,4 @@
-import { css } from 'lit';
+import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { Chip } from './chips/chip.js';
 import { Component } from './component.js';
@@ -17,6 +17,14 @@ export class Pin extends Component {
 			width: 1em;
 			height: 1em;
 			z-index: 3;
+		}
+
+		dfn {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
 		}
 	`;
 
@@ -102,5 +110,15 @@ export class Pin extends Component {
 		for (const wire of this.wires) {
 			wire.remove();
 		}
+	}
+
+	protected get displayLabel(): string {
+		if (this.label) return this.label;
+		const pins = this.isInput ? this.chip.inputs : this.chip.outputs;
+		return `${this.isInput ? 'Input' : 'Output'} #${pins.toArray().indexOf(this) + 1}`;
+	}
+
+	public render() {
+		return html` <dfn title="${this.displayLabel}"></dfn> `;
 	}
 }

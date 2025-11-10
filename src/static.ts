@@ -20,6 +20,7 @@ export interface SubChip {
 	kind: string;
 	x: number;
 	y: number;
+	label?: string;
 }
 
 export interface ChipData {

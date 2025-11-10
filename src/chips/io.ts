@@ -1,10 +1,10 @@
 /* Built-in I/O "chips" */
 
+import $ from 'jquery';
 import { css, html } from 'lit';
-import { Chip, register } from './chip.js';
 import { Pin } from '../pin.js';
 import { colorState } from '../utils.js';
-import $ from 'jquery';
+import { Chip, register } from './chip.js';
 
 /**
  * @internal
@@ -34,6 +34,18 @@ export class IO extends Chip {
 				height: 0.25em;
 				background-color: #666;
 			}
+
+			.label {
+				position: absolute;
+				top: -1em;
+				height: 1em;
+				left: 100%;
+				border: none;
+				outline: none;
+				background: #3333;
+				max-width: 10em;
+				width: min-content;
+			}
 		`,
 	];
 
@@ -62,7 +74,13 @@ export class IO extends Chip {
 
 	public render() {
 		return html`
-			<p>${this.name}</p>
+			<input
+				class="label"
+				value="${this.label}"
+				@change="${(e: InputEvent & { currentTarget: HTMLInputElement }) => {
+					this.label = e.currentTarget.value;
+				}}"
+			/>
 			<div class="connector"></div>
 			${this.pins.toArray()}
 		`;
@@ -73,11 +91,16 @@ export class IO extends Chip {
 export class Input extends IO {
 	public constructor() {
 		super(false);
-		this.addEventListener('mouseup', e => {
-			if (e.target != this || this.hasMoved || e.button == 1) return;
-			this.pin.set(!this.pin.state);
-			this.requestUpdate();
-		});
+		this.addEventListener(
+			'mouseup',
+			e => {
+				const [actualTarget] = e.composedPath();
+				if (actualTarget != this || this.hasMoved || e.button == 1) return;
+				this.pin.set(!this.pin.state);
+				this.requestUpdate();
+			},
+			{ capture: true }
+		);
 	}
 }
 
