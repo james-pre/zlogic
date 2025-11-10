@@ -99,3 +99,15 @@
 	top: 4em;
 	overflow: scroll;
 }
+
+.chip-li {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 1em;
+
+	> .del {
+		width: 2em;
+		text-align: center;
+	}
+}

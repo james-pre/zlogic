@@ -105,12 +105,33 @@ function compileAndLink(chip: ChipData): ChipEval | undefined {
 
 export function createChip(chip: ChipData) {
 	$('<li />')
-		.text(chip.name)
-		.appendTo('.chips ul')
+		.append($('<span />').text(chip.name))
+		.append(
+			$('<span />')
+				.addClass('del')
+				.text('🗑')
+				.on('click', e => {
+					if (!currentProject) return;
+					void popup(true, 'Are you sure you want to delete this chip?')
+						.then(() => {
+							const { chips } = currentProject!;
+							chips.splice(
+								chips.findIndex(c => c.id == chip.id),
+								1
+							);
+							e.stopPropagation();
+							$(e.currentTarget).parent('.chip-li').remove();
+							save(true);
+						})
+						.catch(() => {});
+				})
+		)
+		.addClass('chip-li')
 		.on('click', () => {
 			if (!currentProject) return;
 			editor.load(currentProject.chips.find(({ id }) => id == chip.id)!);
-		});
+		})
+		.appendTo('#chip-list');
 
 	@register({
 		builtin: false,
@@ -126,12 +147,12 @@ export function createChip(chip: ChipData) {
 
 const prefix = 'project~';
 
-export function save() {
+export function save(noNewChip: boolean = false) {
 	if (!currentProject) return;
 	const newChip = editor.serialize();
 	currentProject.editor = newChip;
 	currentProject.state = editor.state();
-	if (newChip.id) {
+	if (newChip.id && !noNewChip) {
 		const i = currentProject.chips.findIndex(chip => chip.id == newChip.id);
 		if (i == -1) {
 			createChip(newChip);
@@ -151,7 +172,7 @@ export function save() {
 	localStorage.setItem(prefix + currentProject.id, JSON.stringify(currentProject));
 }
 
-editor.toolbar.find<HTMLSelectElement>('button.save').on('click', save);
+editor.toolbar.find<HTMLSelectElement>('button.save').on('click', () => save());
 
 $('#chip-upload').on('click', () => {
 	void upload('json', false)

@@ -9,7 +9,7 @@ $('#menu button.new').on('click', () => {
 	void popup(true, 'Project name: <input />')
 		.then(project.create)
 		.then(project.open)
-		.then(project.save)
+		.then(() => project.save())
 		.catch(() => null);
 });
 

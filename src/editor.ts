@@ -183,13 +183,11 @@ export function state(): EditorState {
 }
 
 toolbar.find<HTMLSelectElement>('button.download').on('click', e => {
-	const chipFile: ChipFile = {
-		version: 0,
-		file: 'chip',
-		chip: serialize(),
-	};
+	const chip = serialize();
 
-	download('chip.json', JSON.stringify(chipFile));
+	const chipFile: ChipFile = { version: 0, file: 'chip', chip };
+
+	download((chip.name ?? 'unnamed_chip') + '.json', JSON.stringify(chipFile));
 });
 
 toolbar.find('button.reset').on('click', clear);
