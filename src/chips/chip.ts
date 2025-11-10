@@ -102,6 +102,7 @@ export function register({ id, display, builtin = false, ...rest }: Partial<Chip
 		$('<option />')
 			.val(id)
 			.text(display)
+			.attr('data-chip-id', id)
 			.appendTo('optgroup.' + (builtin ? 'builtin' : 'project'));
 
 		return _;

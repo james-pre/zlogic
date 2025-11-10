@@ -105,6 +105,7 @@ function compileAndLink(chip: ChipData): ChipEval | undefined {
 
 export function createChip(chip: ChipData) {
 	$('<li />')
+		.attr('data-chip-id', chip.id)
 		.append($('<span />').text(chip.name))
 		.append(
 			$('<span />')
@@ -120,7 +121,7 @@ export function createChip(chip: ChipData) {
 								1
 							);
 							e.stopPropagation();
-							$(e.currentTarget).parent('.chip-li').remove();
+							$(`[data-chip-id="${chip.id}"]`).remove();
 							save(true);
 						})
 						.catch(() => {});
