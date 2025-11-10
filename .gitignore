@@ -4,3 +4,11 @@ docs
 *.log
 tmp
 build
+.*
+!.editorconfig
+!.github
+!.gitattributes
+!.gitignore
+!.prettierignore
+!.prettierrc
+!.vscode
