@@ -1,24 +1,25 @@
 /* Built-in I/O "chips" */
 
-import { css, html, type TemplateResult } from 'lit';
+import { css, html, unsafeCSS, type TemplateResult } from 'lit';
 import { Pin } from '../pin.js';
 import type { SubChip } from '../static.js';
 import { colorState, popup, splitBin } from '../utils.js';
 import { Chip, register } from './chip.js';
 
-const ioStyles = css`
+const ioStyle = (selector: string) =>
+	unsafeCSS(`${selector} {
+	position: absolute;
+	min-width: 2em;
+	min-height: 2em;
+	aspect-ratio: 1;
+	border-radius: 50%;
+	transform-origin: center;
+	border: 3px solid #555;
+}`);
+
+const styles = css`
 	:host([dragging]) {
 		cursor: grabbing;
-	}
-
-	.io {
-		position: absolute;
-		min-width: 2em;
-		min-height: 2em;
-		aspect-ratio: 1;
-		border-radius: 50%;
-		transform-origin: center;
-		border: 3px solid #555;
 	}
 
 	div.connector {
@@ -60,30 +61,11 @@ function ioLabel(io: Chip) {
 	/>`;
 }
 
-function ioPin(io: IO | IOGroup, pin: Pin) {
-	const div = io.isInput ? html`<div class="io" @mouseup=${{ handleEvent: () => toggleInput(io, pin), capture: true }}></div>` : html`<div class="io"></div>`;
-
-	return html`
-		${div}
-		<div class="connector ${io.isInput ? 'output' : 'output'}"></div>
-		${pin}
-	`;
-}
-
-function toggleInput(this: void, chip: Chip, pin: Pin) {
-	return function (event: MouseEvent) {
-		const [actualTarget] = event.composedPath();
-		if (chip.hasMoved || event.button == 1) return;
-		pin.set(!pin.state);
-		chip.requestUpdate();
-	};
-}
-
 /**
  * @internal
  */
 export class IO extends Chip {
-	static styles = [super.styles, ioStyles];
+	static styles = [super.styles, styles, ioStyle(':host')];
 
 	public readonly pin: Pin;
 
@@ -106,7 +88,11 @@ export class IO extends Chip {
 	public simUpdate(): void {}
 
 	public render() {
-		return html`${ioLabel(this)} ${ioPin(this, this.pin)}`;
+		return html`
+			${ioLabel(this)}
+			<div class="connector ${this.isInput ? 'input' : 'output'}"></div>
+			${this.pin}
+		`;
 	}
 }
 
@@ -118,7 +104,16 @@ export class Input extends IO {
 
 	public constructor() {
 		super(true);
-		this.addEventListener('mouseup', toggleInput(this, this.pin), { capture: true });
+		this.addEventListener(
+			'mouseup',
+			e => {
+				const [actualTarget] = e.composedPath();
+				if (actualTarget != this || this.hasMoved || e.button == 1) return;
+				this.pin.set(!this.pin.state);
+				this.requestUpdate();
+			},
+			{ capture: true }
+		);
 	}
 }
 
@@ -140,26 +135,52 @@ export class Output extends IO {
 export abstract class IOGroup extends Chip<{ pinCount: number }> {
 	static styles = [
 		super.styles,
-		ioStyles,
+		styles,
+		ioStyle('.pin'),
 		css`
+			:host {
+				width: 4em;
+			}
+
+			.pins {
+				position: absolute;
+				inset: 0;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 1em;
+			}
+
 			.display {
 				position: absolute;
 				top: 0;
 				height: 100%;
 				width: 3em;
 
-				svg.bracket {
+				.line {
 					position: absolute;
-					inset: 0;
-					width: 100%;
-					height: 100%;
+					border-radius: 0.5em;
+					background-color: #aaa;
+				}
 
-					path {
-						stroke: #aaa;
-						stroke-width: 4;
-						fill: none;
-						stroke-linejoin: round;
-					}
+				.line.top {
+					top: 1em;
+				}
+
+				.line.bottom {
+					bottom: 1em;
+				}
+
+				.line.horizontal {
+					left: 0.5em;
+					width: calc(100% - 1em);
+					height: 0.5em;
+				}
+
+				.line.vertical {
+					left: 0.5em;
+					width: 0.5em;
+					height: calc(50% - 4em);
 				}
 
 				.value {
@@ -186,7 +207,7 @@ export abstract class IOGroup extends Chip<{ pinCount: number }> {
 		`,
 	];
 
-	async setup({ pinCount }: { pinCount: number }): Promise<void> {
+	async setup({ pinCount }: { pinCount?: number } = {}): Promise<void> {
 		if (!pinCount) {
 			const input = await popup(true, 'Number of pins: <input type="number" min="1" step="1" required />');
 			if (!input) throw 'Please specify number of pins';
@@ -214,41 +235,9 @@ export abstract class IOGroup extends Chip<{ pinCount: number }> {
 		);
 	}
 
-	public updated(_: Map<PropertyKey, unknown>): void {
-		super.updated(_);
-	}
-
-	public simUpdate(): void {}
-
-	protected abstract renderDisplay(): TemplateResult<any>;
-
-	public render() {
-		return html`
-			${ioLabel(this)}
-			<div class="display ${this.isInput ? 'input' : 'output'}">${this.renderDisplay()}</div>
-			${this.pins.toArray().map(pin => ioPin(this, pin))}
-		`;
-	}
-
-	public toJSON(): SubChip & { pinCount: number } {
-		return {
-			...super.toJSON(),
-			pinCount: this.pins.size,
-		};
-	}
-}
-
-@register
-export class InputGroup extends IOGroup {
-	static builtin = true;
-	static display = 'Input Group';
-	static eval = (a: boolean[]) => a;
-
-	public constructor() {
-		super(true);
-	}
-
 	set value(v: number) {
+		if (!this.isInput) return;
+
 		v >>>= 0;
 		v %= 1 << this.pins.size;
 
@@ -257,13 +246,75 @@ export class InputGroup extends IOGroup {
 		for (const pin of this.pins) pin.set(state.pop()!);
 	}
 
-	protected renderDisplay(): TemplateResult<any> {
+	public updated(_: Map<PropertyKey, unknown>): void {
+		super.updated(_);
+		this.style.height = `${Math.max(2, this.pins.size) * 3}em`;
+		for (const [i, pin] of this.pins.entries()) {
+			this.shadowRoot!.querySelector<HTMLDivElement>(`.pin[data-i='${i}']`)!.style.backgroundColor = colorState(pin.state);
+		}
+		this.shadowRoot!.querySelector<HTMLElement>('.value')!.textContent = this.value.toString();
+	}
+
+	public simUpdate(): void {}
+
+	protected renderPin(pin: Pin, i: number): TemplateResult<any> {
+		const toggle = (event: MouseEvent) => {
+			console.log('clicked pin');
+			if (!this.isInput || event.button == 1) return;
+			pin.set(!pin.state);
+			this.requestUpdate();
+		};
+
+		return html`<style>
+				.pin[data-i='${i}'] {
+					top: ${i * 3}em;
+				}
+			</style>
+			<div
+				class="pin"
+				data-i="${i}"
+				@mouseup=${{ handleEvent: () => toggle, capture: true, bubbles: false, composed: true }}
+				style="background-color: ${colorState(pin.state)}"
+			>
+				<div class="connector ${this.isInput ? 'input' : 'output'}"></div>
+				${pin}
+			</div>`;
+	}
+
+	protected _onChange = (e: InputEvent & { currentTarget: HTMLInputElement }) => {
+		if (!this.isInput) return;
+		this.value = parseInt(e.currentTarget.value);
+		this.requestUpdate();
+	};
+
+	public render() {
 		return html`
-			<svg class="bracket" viewBox="0 0 10 100" preserveAspectRatio="none">
-				<path d="M 10 0 H 2 V 30 M 2 70 V 100 H 10" />
-			</svg>
-			<input class="value" value="${this.value}" />
+			${ioLabel(this)}
+			<div class="display ${this.isInput ? 'input' : 'output'}">
+				<div class="line top horizontal"></div>
+				<div class="line top vertical"></div>
+				${this.isInput ? html`<input class="value" value="${this.value}" @change=${this._onChange} />` : html`<span class="value">${this.value}</span>`}
+				<div class="line bottom vertical"></div>
+				<div class="line bottom horizontal"></div>
+			</div>
+			<div class="pins">${this.pins.toArray().map((pin, i) => this.renderPin(pin, i))}</div>
 		`;
+	}
+
+	public toJSON(): SubChip & { pinCount: number } {
+		return { ...super.toJSON(), pinCount: this.pins.size };
+	}
+}
+
+@register
+export class InputGroup extends IOGroup {
+	static builtin = true;
+	static display = 'Input Group';
+	static eval = (a: boolean[]) => a;
+	static color = '#0000';
+
+	public constructor() {
+		super(true);
 	}
 }
 
@@ -272,17 +323,9 @@ export class OutputGroup extends IOGroup {
 	static builtin = true;
 	static display = 'Output Group';
 	static eval = (a: boolean[]) => a;
+	static color = '#0000';
 
 	public constructor() {
 		super(false);
-	}
-
-	protected renderDisplay(): TemplateResult<any> {
-		return html`
-			<svg class="bracket" viewBox="0 0 10 100" preserveAspectRatio="none">
-				<path d="M 0 0 H 8 V 30 M 8 70 V 100 H 0" />
-			</svg>
-			<span class="value">${this.value}</span>
-		`;
 	}
 }

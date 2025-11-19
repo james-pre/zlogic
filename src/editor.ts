@@ -164,19 +164,13 @@ export function serialize(): ChipData {
 			const out_chip = wire.output!.chip;
 			const out_pin = out_chip.inputs.toArray().indexOf(wire.output!);
 
-			return {
-				from: [chipArray.indexOf(in_chip), in_pin],
-				to: [chipArray.indexOf(out_chip), out_pin],
-				anchors: wire.anchors.toArray().map(a => anchorArray.indexOf(a)),
-			};
+			return { from: [chipArray.indexOf(in_chip), in_pin], to: [chipArray.indexOf(out_chip), out_pin], anchors: wire.anchors.toArray().map(a => anchorArray.indexOf(a)) };
 		}),
 	};
 }
 
 export function state(): EditorState {
-	return {
-		input: inputs().map(input => +input.pin.state as 0 | 1),
-	};
+	return { input: inputs().map(input => +input.pin.state as 0 | 1) };
 }
 
 toolbar.find<HTMLSelectElement>('button.download').on('click', e => {
