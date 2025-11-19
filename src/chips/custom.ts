@@ -1,9 +1,9 @@
 import { List } from 'utilium';
 import { Pin } from '../pin.js';
 import type { ChipData, SubChip } from '../static.js';
-import { Chip, chips, type ChipLike, type ChipMetadata } from './chip.js';
+import { Chip, chips, type ChipStatic } from './chip.js';
 
-export type CustomStaticLike = ChipMetadata & ChipLike & { data: ChipData };
+export type CustomStaticLike = ChipStatic & { data: ChipData };
 
 export class CustomChip extends Chip {
 	declare ['constructor']: CustomStaticLike;
@@ -197,7 +197,7 @@ export function chip_sort_sub(data: ChipData): [number, SubChip][] {
 /**
  * "Compiles" the chip into a JS sub-set
  */
-export function chip_compile(chip: ChipData | (ChipLike & ChipMetadata), pretty: boolean = false): string {
+export function chip_compile(chip: ChipData | ChipStatic, pretty: boolean = false): string {
 	if (typeof chip == 'function' && chip.builtin) {
 		throw 'Built-in chip can not be compiled: ' + chip.name;
 	}
@@ -270,7 +270,7 @@ export type ChipEval = (inputs: boolean[]) => boolean[];
 
 const id = String.raw`\$(\d+|in)`;
 const index = String.raw`(\[\d+\])?`;
-const args = String.raw`${id}${index}(,\s*${id}${index})+`;
+const args = String.raw`(${id}${index})?(,\s*${id}${index})*`;
 
 const intRegex = new RegExp(String.raw`^(return\s*\[${args}\])|(${id}\s*=\s*(([\w_]+\(${args}\))|${id}))$`);
 
@@ -285,7 +285,7 @@ export function chip_link(code: string, id?: string): ChipEval {
 		const int = instructions[i];
 
 		if (!intRegex.test(int)) {
-			throw `Refusing to link: instruction ${i} is unsafe or invalid`;
+			throw new Error(`Refusing to link, instruction ${i} is unsafe or invalid: \`${int}\``);
 		}
 	}
 
