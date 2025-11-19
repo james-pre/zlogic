@@ -5,6 +5,7 @@ import * as editor from './editor.js';
 import { version, type ChipData, type ChipFile, type ProjectFile } from './static.js';
 import { popup } from './utils.js';
 import { chip_compile, chip_link, CustomChip, type ChipEval } from './chips/custom.js';
+import { pick } from 'utilium';
 
 let currentProject: ProjectFile | null;
 
@@ -90,14 +91,15 @@ export function load(id: string) {
 	createUI(data);
 }
 
-function compileAndLink(chip: ChipData): ChipEval | undefined {
-	let exec: ChipEval | undefined;
+function compileAndLink(chip: ChipData): ChipEval {
+	let exec: ChipEval;
 
 	try {
 		chip.code = chip_compile(chip);
 		exec = chip_link(chip.code, chip.id);
 	} catch (e) {
-		console.warn(`Failed to compile and link "${chip.id}":`, e);
+		console.error(`Failed to compile and link "${chip.id}":`, e);
+		throw e;
 	}
 
 	return exec;
@@ -134,14 +136,14 @@ export function createChip(chip: ChipData) {
 		})
 		.appendTo('#chip-list');
 
-	@register({
-		builtin: false,
-		id: chip.id,
-		color: chip.color,
-		display: chip.name,
-		eval: compileAndLink(chip),
-	})
+	@register
 	class __CustomChip__ extends CustomChip {
+		static builtin = false;
+		static {
+			Object.assign(this, pick(chip, 'id', 'color'));
+		}
+		static display = chip.name;
+		static eval = compileAndLink(chip)!;
 		static data = chip;
 	}
 }

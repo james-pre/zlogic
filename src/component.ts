@@ -45,7 +45,11 @@ export abstract class Component extends LitElement {
 		offY: number;
 		lockedAxis?: 'x' | 'y';
 	};
-	protected hasMoved: boolean = false;
+
+	/**
+	 * @internal
+	 */
+	public hasMoved: boolean = false;
 
 	public constructor(
 		protected options: {

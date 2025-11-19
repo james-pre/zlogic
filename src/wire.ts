@@ -9,7 +9,7 @@ import { colorState } from './utils.js';
 @customElement('sim-anchor')
 export class WireAnchor extends Component {
 	public static styles = [
-		Component.styles,
+		super.styles,
 		css`
 			:host {
 				width: 1em;

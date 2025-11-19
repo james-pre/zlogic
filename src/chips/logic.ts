@@ -12,8 +12,12 @@ abstract class TwoInput extends Chip {
 	public b = new Pin(this, true);
 }
 
-@register({ builtin: true, color: '#750', eval: ([a]) => [!a] })
+@register
 export class NOT extends Chip {
+	static builtin = true;
+	static color = '#750';
+	static eval = ([a]: boolean[]) => [!a];
+
 	public input = new Pin(this, true);
 	public output = new Pin(this, false);
 
@@ -22,30 +26,46 @@ export class NOT extends Chip {
 	}
 }
 
-@register({ builtin: true, color: '#493', eval: ([a, b]) => [a || b] })
+@register
 export class OR extends TwoInput {
+	static builtin = true;
+	static color = '#493';
+	static eval = ([a, b]: boolean[]) => [a || b];
+
 	public Update(): void {
 		this.output.set(this.a.state || this.b.state);
 	}
 }
 
 // Eval trick: https://stackoverflow.com/a/4540443/17637456
-@register({ builtin: true, color: '#397', eval: ([a, b]) => [a != b] })
+@register
 export class XOR extends TwoInput {
+	static builtin = true;
+	static color = '#397';
+	static eval = ([a, b]: boolean[]) => [a != b];
+
 	public Update(): void {
 		this.output.set(this.a.state != this.b.state);
 	}
 }
 
-@register({ builtin: true, color: '#236', eval: ([a, b]) => [a && b] })
+@register
 export class AND extends TwoInput {
+	static builtin = true;
+	static color = '#236';
+	static eval = ([a, b]: boolean[]) => [a && b];
+
 	public Update(): void {
 		this.output.set(this.a.state && this.b.state);
 	}
 }
 
-@register({ builtin: true, color: '#725', eval: ([a, b]) => [!(a && b)] })
+@register
 export class NAND extends TwoInput {
+	static builtin = true;
+	static color = '#725';
+	static eval = ([a, b]: boolean[]) => [!(a && b)];
+
 	public Update(): void {
 		this.output.set(!(this.a.state && this.b.state));
 	}

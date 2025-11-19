@@ -7,10 +7,10 @@ import { chipHeightScaling, type SubChip } from '../static.js';
 import { randomColor } from '../utils.js';
 
 export abstract class Chip extends Component {
-	declare ['constructor']: ChipMetadata & ChipLike;
+	declare ['constructor']: ChipStatic;
 
 	static styles = [
-		Component.styles,
+		super.styles,
 		css`
 			:host {
 				position: absolute;
@@ -80,31 +80,44 @@ export abstract class Chip extends Component {
 	}
 }
 
-export interface ChipMetadata {
-	id: string;
-	display: string;
-	builtin: boolean;
+export interface ChipLike {
+	new (): Chip;
+	id?: string;
+	builtin?: boolean;
+	display?: string;
 	color?: string;
-	eval?(inputs: boolean[]): boolean[];
+	eval(inputs: boolean[]): boolean[];
 }
 
-export type ChipLike = new () => Chip;
+export interface ChipStatic extends Required<ChipLike> {
+	new (): Chip;
+	id: string;
+}
 
-export const chips = new Map<string, ChipLike & ChipMetadata>();
+export const chips = new Map<string, ChipStatic>();
 
-export function register({ id, display, builtin = false, ...rest }: Partial<ChipMetadata>) {
-	return function <T extends ChipLike>(target: T): T & ChipMetadata {
-		id ||= target.name.toLowerCase();
-		display ||= target.name;
-		customElements.define('sim-chip-' + Math.random().toString(16).slice(2), target);
-		const _ = Object.assign(target, { id, display, builtin, color: randomColor(), ...rest });
-		chips.set(id, _);
-		$('<option />')
-			.val(id)
-			.text(display)
-			.attr('data-chip-id', id)
-			.appendTo('optgroup.' + (builtin ? 'builtin' : 'project'));
+/**
+ * We use a function since that is the only way to assert a type in TS
+ */
+function __initChipStatic<T extends ChipLike>(chip: T): asserts chip is T & ChipStatic {
+	chip.id ||= chip.name.toLowerCase();
+	let i = 0;
+	while (chips.has(chip.id)) i++;
+	if (i) chip.id += i.toString(16);
+	chip.display ||= chip.name;
+	chip.builtin ??= false;
+	chip.color ??= randomColor();
+}
 
-		return _;
-	};
+export function register<const T extends ChipLike>(chip: T): T & ChipStatic {
+	__initChipStatic(chip);
+	customElements.define('sim-chip-' + chip.id, chip);
+	chips.set(chip.id, chip);
+	$('<option />')
+		.val(chip.id)
+		.text(chip.display)
+		.attr('data-chip-id', chip.id)
+		.appendTo('optgroup.' + (chip.builtin ? 'builtin' : 'project'));
+
+	return chip;
 }
