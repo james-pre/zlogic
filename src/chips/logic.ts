@@ -21,7 +21,7 @@ export class NOT extends Chip {
 	public input = new Pin(this, true);
 	public output = new Pin(this, false);
 
-	public Update(): void {
+	public simUpdate(): void {
 		this.output.set(!this.input.state);
 	}
 }
@@ -32,7 +32,7 @@ export class OR extends TwoInput {
 	static color = '#493';
 	static eval = ([a, b]: boolean[]) => [a || b];
 
-	public Update(): void {
+	public simUpdate(): void {
 		this.output.set(this.a.state || this.b.state);
 	}
 }
@@ -44,7 +44,7 @@ export class XOR extends TwoInput {
 	static color = '#397';
 	static eval = ([a, b]: boolean[]) => [a != b];
 
-	public Update(): void {
+	public simUpdate(): void {
 		this.output.set(this.a.state != this.b.state);
 	}
 }
@@ -55,7 +55,7 @@ export class AND extends TwoInput {
 	static color = '#236';
 	static eval = ([a, b]: boolean[]) => [a && b];
 
-	public Update(): void {
+	public simUpdate(): void {
 		this.output.set(this.a.state && this.b.state);
 	}
 }
@@ -66,7 +66,7 @@ export class NAND extends TwoInput {
 	static color = '#725';
 	static eval = ([a, b]: boolean[]) => [!(a && b)];
 
-	public Update(): void {
+	public simUpdate(): void {
 		this.output.set(!(this.a.state && this.b.state));
 	}
 }

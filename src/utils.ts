@@ -5,25 +5,30 @@ export function randomID(): string {
 	return crypto.randomUUID();
 }
 
-const popup_ = $<HTMLDialogElement>('#popup');
+const popupDialog = $<HTMLDialogElement>('#popup');
 export function popup(isPrompt: boolean, contents: string): Promise<string | undefined> {
 	const { promise, resolve, reject } = Promise.withResolvers<string | undefined>();
 
-	popup_.find('.cancel')[isPrompt ? 'show' : 'hide']();
-	popup_.find('.contents')[isPrompt ? 'html' : 'text'](contents);
+	popupDialog.find('.cancel')[isPrompt ? 'show' : 'hide']();
+	popupDialog.find('.contents')[isPrompt ? 'html' : 'text'](contents);
 
-	popup_[0].showModal();
+	popupDialog[0].showModal();
 
-	popup_.find('button').on('click', e => {
-		popup_[0].close();
+	popupDialog.find('button').on('click', e => {
+		popupDialog[0].close();
 		if (e.target.classList.contains('cancel')) {
 			reject();
 		} else {
-			resolve(popup_.find('input').val());
+			resolve(popupDialog.find('input').val());
 		}
 	});
 
 	return promise;
+}
+
+export function showError(error: unknown): void {
+	const message = error instanceof Error ? error.message : String(error);
+	void popup(false, message);
 }
 
 export function colorState(state: boolean): string {
@@ -37,14 +42,14 @@ export function randomColor(): string {
 /**
  * Splits up a number into an array of true/false
  */
-export function shardN(n: number, length: number): boolean[] {
+export function splitBin(length: number, n: number): boolean[] {
 	return [...n.toString(2).slice(0, length).padStart(length, '0')].map(bit => bit == '1');
 }
 
 /**
  * Turns an array of true/false into a number
  */
-export function unshardN(values: boolean[], length: number): number {
+export function unshardN(length: number, values: boolean[]): number {
 	return parseInt(
 		values
 			.map(bit => (bit ? '1' : '0'))
@@ -54,4 +59,4 @@ export function unshardN(values: boolean[], length: number): number {
 	);
 }
 
-Object.assign(globalThis, { shardN, unshardN });
+Object.assign(globalThis, { shardN: splitBin, unshardN });

@@ -6,7 +6,7 @@ import type { Pin } from '../pin.js';
 import { chipHeightScaling, type SubChip } from '../static.js';
 import { randomColor } from '../utils.js';
 
-export abstract class Chip extends Component {
+export abstract class Chip<Config = unknown> extends Component {
 	declare ['constructor']: ChipStatic;
 
 	static styles = [
@@ -51,7 +51,7 @@ export abstract class Chip extends Component {
 		}
 	}
 
-	public abstract Update(): void;
+	public setup?(config?: Config): unknown;
 
 	public remove(): void {
 		super.remove();

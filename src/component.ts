@@ -91,10 +91,7 @@ export abstract class Component extends LitElement {
 		return resolveConstructors(this).includes(kind);
 	}
 
-	/**
-	 * Upper case because lit is dumb
-	 */
-	abstract Update(): void;
+	public abstract simUpdate(): void;
 
 	protected updated(_: PropertyValues): void {
 		super.updated(_);

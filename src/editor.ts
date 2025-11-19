@@ -5,7 +5,7 @@ import { Chip, chips as chipConstructors } from './chips/chip.js';
 import { Input } from './chips/index.js'; // Need side-effects
 import type { Pin } from './pin.js';
 import type { ChipData, ChipFile, EditorState } from './static.js';
-import { popup, randomColor } from './utils.js';
+import { popup, randomColor, showError } from './utils.js';
 import { Wire, WireAnchor, removePendingWire, pendingWire, addPendingWire } from './wire.js';
 import { eventPosition } from './component.js';
 
@@ -37,7 +37,7 @@ export const chips = new List<Chip>(),
 	wires = new List<Wire>(),
 	anchors = new List<WireAnchor>();
 
-export function addChip(id: string): Chip {
+export async function addChip(id: string): Promise<Chip> {
 	const ChipCtor = chipConstructors.get(id);
 	if (!ChipCtor) {
 		throw 'Component does not exist';
@@ -47,6 +47,7 @@ export function addChip(id: string): Chip {
 	}
 
 	const subChip = new ChipCtor();
+	if (subChip.setup) await subChip.setup();
 	subChip.addEventListener('remove', () => chips.delete(subChip));
 	chips.add(subChip);
 	element.append(subChip);
@@ -58,16 +59,11 @@ export function inputs(): Input[] {
 }
 
 toolbar.find<HTMLSelectElement>('select.add').on('change', e => {
-	if (!e.target.value) {
-		return;
-	}
+	if (!e.target.value) return;
 
-	try {
-		addChip(e.target.value);
-	} catch (text: any) {
-		void popup(false, text as string);
-	}
-	e.target.value = '';
+	void addChip(e.target.value)
+		.then(() => (e.target.value = ''))
+		.catch(showError);
 });
 
 export function connectWire(this: Pin, event: MouseEvent) {
@@ -115,15 +111,16 @@ element.on('click', event => {
 	anchors.add(anchor);
 });
 
-export function load(data: ChipData): void {
+export async function load(data: ChipData): Promise<void> {
 	clear();
 	toolbar.find('input.id').val(data.id);
 	toolbar.find('input.name').val(data.name);
 	toolbar.find('input.color').val(data.color);
 
-	for (const { kind, ...rest } of data.chips) {
-		const chip = addChip(kind);
-		Object.assign(chip, rest);
+	for (const { kind, x, y, label, ...rest } of data.chips) {
+		const chip = await addChip(kind);
+		chip.setup?.(rest);
+		Object.assign(chip, { x, y, label });
 	}
 
 	for (const [x, y] of data.anchors) {

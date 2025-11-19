@@ -3,7 +3,7 @@ import { download, upload } from 'utilium/dom.js';
 import { chips, register } from './chips/chip.js';
 import * as editor from './editor.js';
 import { version, type ChipData, type ChipFile, type ProjectFile } from './static.js';
-import { popup } from './utils.js';
+import { popup, showError } from './utils.js';
 import { chip_compile, chip_link, CustomChip, type ChipEval } from './chips/custom.js';
 import { pick } from 'utilium';
 
@@ -29,7 +29,7 @@ export function open(project: ProjectFile) {
 		createChip(chip);
 	}
 	editor.open();
-	editor.load(project.editor);
+	void editor.load(project.editor).catch(showError);
 	const inputs = editor.inputs();
 	for (let i = 0; i < Math.min(inputs.length, project.state.input.length); i++) {
 		inputs[i].pin.set(project.state.input[i] == 1);
@@ -132,7 +132,7 @@ export function createChip(chip: ChipData) {
 		.addClass('chip-li')
 		.on('click', () => {
 			if (!currentProject) return;
-			editor.load(currentProject.chips.find(({ id }) => id == chip.id)!);
+			void editor.load(currentProject.chips.find(({ id }) => id == chip.id)!).catch(showError);
 		})
 		.appendTo('#chip-list');
 

@@ -18,7 +18,7 @@ export class CustomChip extends Chip {
 		}
 	}
 
-	public Update(): void {
+	public simUpdate(): void {
 		const inputs = this.inputs.toArray().map(input => input.state);
 
 		const out_values = chip_eval(this.constructor.id, inputs);

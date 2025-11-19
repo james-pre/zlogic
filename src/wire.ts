@@ -57,7 +57,7 @@ export class WireAnchor extends Component {
 		});
 	}
 
-	public Update(): void {}
+	public simUpdate(): void {}
 
 	public remove(): void {
 		super.remove();
@@ -116,7 +116,7 @@ export class Wire extends Component {
 		input.wires.add(this);
 	}
 
-	public Update(): void {
+	public simUpdate(): void {
 		this.output?.set(this.input.state);
 		this.requestUpdate();
 	}
@@ -163,7 +163,7 @@ export class Wire extends Component {
 		output.wires.add(this);
 
 		this.isCompleted = true;
-		this.Update();
+		this.simUpdate();
 	}
 
 	public render() {
