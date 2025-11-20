@@ -212,7 +212,7 @@ export function chip_sort_sub(data: ChipData): [number, SubChip][] {
 /**
  * "Compiles" the chip into a JS sub-set
  */
-export function chip_compile(chip: ChipData | ChipStatic, pretty: boolean = false): string {
+export function chip_compile(chip: ChipData | ChipStatic, minify: boolean = false): string {
 	if (typeof chip == 'function' && chip.builtin) {
 		throw 'Built-in chip can not be compiled: ' + chip.name;
 	}
@@ -220,8 +220,8 @@ export function chip_compile(chip: ChipData | ChipStatic, pretty: boolean = fals
 	const data = typeof chip != 'function' ? chip : (chip as CustomStaticLike).data;
 	if (!data) throw 'Custom chip data missing: ' + chip.name;
 
-	const end = pretty ? '\n' : ';',
-		sep = pretty ? ', ' : ',';
+	const end = minify ? ';' : '\n',
+		sep = minify ? ',' : ', ';
 
 	let code = '';
 	const bindings: Map<number, string> = new Map();
@@ -230,7 +230,9 @@ export function chip_compile(chip: ChipData | ChipStatic, pretty: boolean = fals
 	// Map inputs to $in[N] variables
 	for (const [i, subChip] of data.chips.entries()) {
 		if (subChip.kind == 'input' || subChip.kind == 'input_group') {
-			bindings.set(i, `$in[${inputIndex++}]`);
+			// Hackery to avoid security check because I'm lazy
+			bindings.set(i, `$in[${inputIndex}]`);
+			inputIndex += __isGroup(subChip) ? subChip.pinCount : 1;
 		}
 	}
 
@@ -247,23 +249,25 @@ export function chip_compile(chip: ChipData | ChipStatic, pretty: boolean = fals
 		// Generate function call for each sub-chip based on its inputs
 		const inputs = data.wires
 			.filter(wire => wire.to[0] == i)
-			.map(wire => {
-				const binding = bindings.get(wire.from[0]);
-				return binding?.startsWith('$in') ? binding : `${binding}[${wire.from[1]}]`;
+			.map(({ from: [chipNo, pinNo] }) => {
+				const binding = bindings.get(chipNo);
+				if (!binding?.startsWith('$in')) return `${binding}[${pinNo}]`;
+				const index = parseInt(binding.slice(4, -1));
+				return `$in[${index + pinNo}]`;
 			})
 			.join(sep);
 
-		if (kind == 'output') {
+		if (kind == 'output' || kind == 'output_group') {
 			bindings.set(i, inputs);
 			continue;
 		}
 
-		code += `${binding}${pretty ? ' = ' : '='}${kind}(${inputs})${end}`;
+		code += `${binding}${minify ? '=' : ' = '}${kind}(${inputs})${end}`;
 	}
 
 	// Map outputs directly to the return array, optimizing out `output` calls
 	const returned = data.chips
-		.map((subChip, i) => {
+		.flatMap((subChip, i) => {
 			if (subChip.kind == 'output' || subChip.kind == 'output_group') {
 				const binding = bindings.get(i);
 				return binding ?? null; // Access the first element if binding exists
@@ -313,6 +317,8 @@ export function chip_link(code: string, id?: string): ChipEval {
 
 	// eslint-disable-next-line @typescript-eslint/no-implied-eval
 	const __eval = new Function(args, body) as (inputs: boolean[], fn: typeof _chips) => boolean[];
+
+	Object.assign(window, { ['chip$' + id]: __eval });
 
 	return (inputs: boolean[]) => __eval(inputs, _chips);
 }

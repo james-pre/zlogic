@@ -93,6 +93,8 @@ export interface ChipStatic extends Required<ChipLike> {
 
 export const chips = new Map<string, ChipStatic>();
 
+Object.assign(globalThis, { chips });
+
 /**
  * We use a function since that is the only way to assert a type in TS
  */
