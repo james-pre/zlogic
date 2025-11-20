@@ -172,13 +172,11 @@ export abstract class IOGroup extends Chip<{ pinCount: number }> {
 				}
 
 				.line.horizontal {
-					left: 0.5em;
 					width: calc(100% - 1em);
 					height: 0.5em;
 				}
 
 				.line.vertical {
-					left: 0.5em;
 					width: 0.5em;
 					height: calc(50% - 4em);
 				}
@@ -199,10 +197,26 @@ export abstract class IOGroup extends Chip<{ pinCount: number }> {
 
 			.display.input {
 				right: 100%;
+
+				.line.horizontal {
+					left: 0.5em;
+				}
+
+				.line.vertical {
+					left: 0.5em;
+				}
 			}
 
 			.display.output {
 				left: 100%;
+
+				.line.horizontal {
+					right: 0.5em;
+				}
+
+				.line.vertical {
+					right: 0.5em;
+				}
 			}
 		`,
 	];
@@ -211,7 +225,9 @@ export abstract class IOGroup extends Chip<{ pinCount: number }> {
 
 	async setup({ pinCount }: { pinCount?: number } = {}): Promise<void> {
 		if (!pinCount) {
-			const input = await popup(true, 'Number of pins: <input type="number" min="1" step="1" required />');
+			const input = await popup(true, 'Number of pins: <input type="number" min="1" step="1" required />').catch(() => {
+				throw 'Cancelled.';
+			});
 			if (!input) throw 'Please specify number of pins';
 			pinCount = parseInt(input);
 		}
@@ -219,9 +235,10 @@ export abstract class IOGroup extends Chip<{ pinCount: number }> {
 
 		for (let i = 0; i < pinCount; i++) {
 			// The pin on an input is actually an output
-			const pin = new Pin(this, !this.isInput, true);
-			this.pinGUI.push(this.renderPin(pin, i));
+			new Pin(this, !this.isInput, true);
 		}
+
+		this.requestUpdate();
 	}
 
 	public constructor(public readonly isInput: boolean) {
@@ -255,7 +272,7 @@ export abstract class IOGroup extends Chip<{ pinCount: number }> {
 		for (const [i, pin] of this.pins.entries()) {
 			this.shadowRoot!.querySelector<HTMLDivElement>(`.pin[data-i='${i}']`)!.style.backgroundColor = colorState(pin.state);
 		}
-		this.shadowRoot!.querySelector<HTMLElement>('.value')!.textContent = this.value.toString();
+		if (!this.hasUpdated) this.shadowRoot!.querySelector<HTMLElement>('.value')!.textContent = this.value.toString();
 	}
 
 	public simUpdate(): void {}
@@ -294,7 +311,7 @@ export abstract class IOGroup extends Chip<{ pinCount: number }> {
 				<div class="line bottom vertical"></div>
 				<div class="line bottom horizontal"></div>
 			</div>
-			<div class="pins">${this.pinGUI}</div>
+			<div class="pins">${this.pins.toArray().map((pin, i) => this.renderPin(pin, i))}</div>
 		`;
 	}
 
@@ -306,6 +323,7 @@ export abstract class IOGroup extends Chip<{ pinCount: number }> {
 @register
 export class InputGroup extends IOGroup {
 	static builtin = true;
+	static id = 'input_group';
 	static display = 'Input Group';
 	static eval = (a: boolean[]) => a;
 	static color = '#0000';
@@ -318,6 +336,7 @@ export class InputGroup extends IOGroup {
 @register
 export class OutputGroup extends IOGroup {
 	static builtin = true;
+	static id = 'output_group';
 	static display = 'Output Group';
 	static eval = (a: boolean[]) => a;
 	static color = '#0000';
@@ -325,4 +344,10 @@ export class OutputGroup extends IOGroup {
 	public constructor() {
 		super(false);
 	}
+
+	public simUpdate(): void {
+		this.requestUpdate();
+	}
 }
+
+export const ioKinds = ['input', 'output', 'input_group', 'output_group'];
