@@ -3,6 +3,7 @@ import { Pin } from '../pin.js';
 import type { ChipData, SubChip } from '../static.js';
 import { Chip, chips, type ChipStatic } from './chip.js';
 import { ioKinds } from './io.js';
+import type {} from '../global.js';
 
 export type CustomStaticLike = ChipStatic & { data: ChipData };
 
@@ -48,9 +49,9 @@ export class CustomChip extends Chip {
 /**
  * Get the outputs of a chip
  */
-export function chip_eval(kind: string, input_values: boolean[], _debug: boolean = false): boolean[] {
-	if (kind == 'output') {
-		if (_debug) console.debug('[chip_eval] (output)', input_values);
+export function chip_eval(kind: string, input_values: boolean[]): boolean[] {
+	if (kind == 'output' || kind == 'output_group') {
+		if (window.debug) console.debug('[chip_eval] (output)', input_values);
 		return input_values;
 	}
 
@@ -60,7 +61,7 @@ export function chip_eval(kind: string, input_values: boolean[], _debug: boolean
 
 	if (chip.eval) {
 		const out = chip.eval(input_values);
-		if (_debug) console.debug('[chip_eval] (static)', kind, input_values, out);
+		if (window.debug) console.debug('[chip_eval] (static)', kind, input_values, out);
 		return out;
 	}
 
@@ -68,7 +69,7 @@ export function chip_eval(kind: string, input_values: boolean[], _debug: boolean
 		throw 'Built-in chip can not be dynamically evaluated: ' + kind;
 	}
 
-	if (_debug) console.group('[chip_eval] (dynamic)', kind, input_values);
+	if (window.debug) console.group('[chip_eval] (dynamic)', kind, input_values);
 
 	// Dynamic eval for custom chips
 
@@ -85,13 +86,13 @@ export function chip_eval(kind: string, input_values: boolean[], _debug: boolean
 	const outputIndices = new List<number>();
 
 	for (const [i, subChip] of data.chips.entries()) {
-		if (subChip.kind === 'input' || subChip.kind === 'inputgroup') {
+		if (subChip.kind === 'input' || subChip.kind === 'input_group') {
 			inputIndices.add(i);
-		} else if (subChip.kind === 'output' || subChip.kind === 'outputgroup') {
+		} else if (subChip.kind === 'output' || subChip.kind === 'output_group') {
 			outputIndices.add(i);
 		}
 	}
-	if (_debug) console.debug(inputIndices.size, 'inputs,', outputIndices.size, 'outputs');
+	if (window.debug) console.debug(inputIndices.size, 'inputs,', outputIndices.size, 'outputs');
 
 	// Rule validation
 	for (const wire of data.wires) {
@@ -107,7 +108,7 @@ export function chip_eval(kind: string, input_values: boolean[], _debug: boolean
 	for (let iV = 0; iV < inputIndices.size; iV++) {
 		const iC = inputIndices.at(iV);
 
-		if (_debug) console.debug('init input', iV, iC);
+		if (window.debug) console.debug('init input', iV, iC);
 		const chipInputs = subChips.get(iC) || [];
 		chipInputs.push(input_values[iV]);
 		subChips.set(iC, chipInputs);
@@ -121,7 +122,7 @@ export function chip_eval(kind: string, input_values: boolean[], _debug: boolean
 	while (currentSubChips.size > 0) {
 		const nextSubChips = new Set<number>();
 
-		if (_debug) console.group('depth', depth);
+		if (window.debug) console.group('depth', depth);
 
 		for (const i of currentSubChips) {
 			// Throw error if the sub-chip has already been evaluated
@@ -137,7 +138,7 @@ export function chip_eval(kind: string, input_values: boolean[], _debug: boolean
 
 			// Check if the sub-chip is an "output" chip
 			if (data.chips[i].kind == 'output') {
-				if (_debug) console.debug('set output', i, 'to', subOutputs[0]);
+				if (window.debug) console.debug('set output', i, 'to', subOutputs[0]);
 				output_values[i] = subOutputs[0];
 			} else {
 				// Store evaluated sub-chip's outputs
@@ -151,20 +152,20 @@ export function chip_eval(kind: string, input_values: boolean[], _debug: boolean
 				toChipInputs[wire.to[1]] = subOutputs[wire.from[1]];
 				subChips.set(wire.to[0], toChipInputs);
 				nextSubChips.add(wire.to[0]);
-				if (_debug) console.debug('update', wire.from.join(','), '---', wire.to.join(','));
+				if (window.debug) console.debug('update', wire.from.join(','), '---', wire.to.join(','));
 			}
 		}
 
-		if (_debug) console.debug('evaled', [...currentSubChips].join(','), 'next', [...nextSubChips].join(','));
+		if (window.debug) console.debug('evaled', [...currentSubChips].join(','), 'next', [...nextSubChips].join(','));
 
 		// Move to the next layer of sub-chips to evaluate
 		currentSubChips = nextSubChips;
 		depth++;
 
-		if (_debug) console.groupEnd();
+		if (window.debug) console.groupEnd();
 	}
 
-	if (_debug) {
+	if (window.debug) {
 		console.debug(output_values);
 		console.groupEnd();
 	}
@@ -228,7 +229,7 @@ export function chip_compile(chip: ChipData | ChipStatic, pretty: boolean = fals
 
 	// Map inputs to $in[N] variables
 	for (const [i, subChip] of data.chips.entries()) {
-		if (subChip.kind == 'input') {
+		if (subChip.kind == 'input' || subChip.kind == 'input_group') {
 			bindings.set(i, `$in[${inputIndex++}]`);
 		}
 	}
@@ -237,7 +238,7 @@ export function chip_compile(chip: ChipData | ChipStatic, pretty: boolean = fals
 	let counter = 0;
 	for (const [i, { kind }] of chip_sort_sub(data)) {
 		// Skip "input" kind chips, as they are already mapped
-		if (kind == 'input') continue;
+		if (kind == 'input' || kind == 'input_group') continue;
 
 		// Define a new variable for the sub-chip's output
 		const binding = '$' + counter++;
@@ -263,9 +264,9 @@ export function chip_compile(chip: ChipData | ChipStatic, pretty: boolean = fals
 	// Map outputs directly to the return array, optimizing out `output` calls
 	const returned = data.chips
 		.map((subChip, i) => {
-			if (subChip.kind == 'output') {
+			if (subChip.kind == 'output' || subChip.kind == 'output_group') {
 				const binding = bindings.get(i);
-				return binding ? binding : null; // Access the first element if binding exists
+				return binding ?? null; // Access the first element if binding exists
 			}
 			return null;
 		})
@@ -304,7 +305,7 @@ export function chip_link(code: string, id?: string): ChipEval {
 	}
 
 	const _chips = Object.fromEntries(
-		[...chips].filter(([name, chip]) => typeof chip.eval == 'function' && name != id).map(([name, chip]) => [name, (...args: boolean[]) => chip.eval!(args)])
+		[...chips].filter(([name, chip]) => typeof chip.eval == 'function' && name != id).map(([name, chip]) => [name, (...args: boolean[]) => chip.eval(args)])
 	);
 
 	const args = `$in, {${Object.keys(_chips).join(', ')}}`,
@@ -316,4 +317,4 @@ export function chip_link(code: string, id?: string): ChipEval {
 	return (inputs: boolean[]) => __eval(inputs, _chips);
 }
 
-Object.assign(globalThis, { chip_compile, chip_link, chip_sort_sub });
+Object.assign(window, { chip_compile, chip_link, chip_sort_sub });

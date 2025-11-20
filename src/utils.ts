@@ -73,7 +73,7 @@ export function splitBin(length: number, n: number): boolean[] {
 /**
  * Turns an array of true/false into a number
  */
-export function unshardN(length: number, values: boolean[]): number {
+export function joinBin(length: number, values: boolean[]): number {
 	return parseInt(
 		values
 			.map(bit => (bit ? '1' : '0'))
@@ -83,4 +83,4 @@ export function unshardN(length: number, values: boolean[]): number {
 	);
 }
 
-Object.assign(globalThis, { shardN: splitBin, unshardN });
+Object.assign(globalThis, { splitBin, joinBin });
