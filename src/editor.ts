@@ -3,11 +3,11 @@ import { List } from 'utilium';
 import { download } from 'utilium/dom.js';
 import { Chip, chips as chipConstructors } from './chips/chip.js';
 import { Input } from './chips/index.js'; // Need side-effects
+import { eventPosition } from './component.js';
 import type { Pin } from './pin.js';
 import type { ChipData, ChipFile, EditorState } from './static.js';
-import { popup, randomColor, showError } from './utils.js';
-import { Wire, WireAnchor, removePendingWire, pendingWire, addPendingWire } from './wire.js';
-import { eventPosition } from './component.js';
+import { randomColor, showError } from './utils.js';
+import { Wire, WireAnchor, addPendingWire, pendingWire, removePendingWire } from './wire.js';
 
 export const element = $('#editor'),
 	toolbar = $('#toolbar');
@@ -67,6 +67,7 @@ toolbar.find<HTMLSelectElement>('select.add').on('change', async event => {
 			await chip.setup();
 		} catch (error) {
 			showError(error);
+			chip.remove();
 		}
 	}
 	event.target.value = '';
