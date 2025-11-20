@@ -2,6 +2,7 @@ import { css, LitElement, type CSSResult, type CSSResultGroup, type PropertyValu
 import { property } from 'lit/decorators.js';
 import $ from 'jquery';
 import { resolveConstructors } from 'utilium';
+import { addContextMenu } from './utils.js';
 
 export type ComponentStyles = CSSResult | ComponentStyles[];
 
@@ -62,6 +63,11 @@ export abstract class Component extends LitElement {
 
 			this.setAttribute('dragging', '');
 		});
+
+		addContextMenu(this, {
+			Delete: () => this.remove(),
+		});
+
 		document.addEventListener('keydown', this.onKeyDown);
 		document.addEventListener('mousemove', this.onMouseMove);
 		document.addEventListener('mouseup', this.onMouseUp);
@@ -127,7 +133,8 @@ export abstract class Component extends LitElement {
 	private onMouseMove = (event: MouseEvent) => {
 		if (!this.options.bubbleMouse) event.stopPropagation();
 		if (!this.move) return;
-		this.moveTo(event.clientX - this.move.offX, event.clientY - this.move.offY);
+		const editor = document.querySelector('#editor')!;
+		this.moveTo(event.clientX - this.move.offX + editor.scrollLeft, event.clientY - this.move.offY + editor.scrollTop);
 	};
 
 	private onMouseUp = (event: MouseEvent) => {

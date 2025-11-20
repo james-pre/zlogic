@@ -22,6 +22,34 @@ export function popup(isPrompt: boolean, contents: string): Promise<string | und
 	return promise;
 }
 
+const _contextMenu = $<HTMLDivElement>('#context-menu');
+
+export function addContextMenu(target: HTMLElement, options: Record<string, () => void | Promise<void>>): void {
+	target.addEventListener('contextmenu', event => {
+		event.preventDefault();
+	});
+	target.addEventListener('mouseup', event => {
+		if (event.button != 2) return;
+		event.preventDefault();
+		event.stopPropagation();
+		_contextMenu.empty();
+
+		for (const [label, action] of Object.entries(options)) {
+			const span = document.createElement('span');
+			span.textContent = label;
+			span.addEventListener('click', event => {
+				event.preventDefault();
+				event.stopPropagation();
+				void action();
+				_contextMenu[0].hidePopover();
+			});
+			_contextMenu.append(span);
+		}
+		_contextMenu.css({ left: event.clientX, top: event.clientY });
+		_contextMenu[0].showPopover();
+	});
+}
+
 export function showError(error: unknown): void {
 	const message = error instanceof Error ? error.message : String(error);
 	void popup(false, message);
