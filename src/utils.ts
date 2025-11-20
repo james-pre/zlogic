@@ -67,7 +67,7 @@ export function randomColor(): string {
  * Splits up a number into an array of true/false
  */
 export function splitBin(length: number, n: number): boolean[] {
-	return [...n.toString(2).slice(0, length).padStart(length, '0')].map(bit => bit == '1');
+	return [...n.toString(2).slice(0, length).padStart(length, '0')].reverse().map(bit => bit == '1');
 }
 
 /**
