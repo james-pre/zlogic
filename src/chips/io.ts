@@ -207,6 +207,8 @@ export abstract class IOGroup extends Chip<{ pinCount: number }> {
 		`,
 	];
 
+	protected pinGUI: TemplateResult<any>[] = [];
+
 	async setup({ pinCount }: { pinCount?: number } = {}): Promise<void> {
 		if (!pinCount) {
 			const input = await popup(true, 'Number of pins: <input type="number" min="1" step="1" required />');
@@ -217,7 +219,8 @@ export abstract class IOGroup extends Chip<{ pinCount: number }> {
 
 		for (let i = 0; i < pinCount; i++) {
 			// The pin on an input is actually an output
-			new Pin(this, !this.isInput, true);
+			const pin = new Pin(this, !this.isInput, true);
+			this.pinGUI.push(this.renderPin(pin, i));
 		}
 	}
 
@@ -259,7 +262,6 @@ export abstract class IOGroup extends Chip<{ pinCount: number }> {
 
 	protected renderPin(pin: Pin, i: number): TemplateResult<any> {
 		const toggle = (event: MouseEvent) => {
-			console.log('clicked pin');
 			if (!this.isInput || event.button == 1) return;
 			pin.set(!pin.state);
 			this.requestUpdate();
@@ -270,12 +272,7 @@ export abstract class IOGroup extends Chip<{ pinCount: number }> {
 					top: ${i * 3}em;
 				}
 			</style>
-			<div
-				class="pin"
-				data-i="${i}"
-				@mouseup=${{ handleEvent: () => toggle, capture: true, bubbles: false, composed: true }}
-				style="background-color: ${colorState(pin.state)}"
-			>
+			<div class="pin" data-i="${i}" @mouseup=${toggle} style="background-color: ${colorState(pin.state)}">
 				<div class="connector ${this.isInput ? 'input' : 'output'}"></div>
 				${pin}
 			</div>`;
@@ -297,7 +294,7 @@ export abstract class IOGroup extends Chip<{ pinCount: number }> {
 				<div class="line bottom vertical"></div>
 				<div class="line bottom horizontal"></div>
 			</div>
-			<div class="pins">${this.pins.toArray().map((pin, i) => this.renderPin(pin, i))}</div>
+			<div class="pins">${this.pinGUI}</div>
 		`;
 	}
 
