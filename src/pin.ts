@@ -6,6 +6,7 @@ import { connectWire, element } from './editor.js';
 import type { Wire } from './wire.js';
 import { colorState } from './utils.js';
 import { chipHeightScaling } from './static.js';
+import $ from 'jquery';
 
 @customElement('sim-pin')
 export class Pin extends Component {
@@ -41,7 +42,11 @@ export class Pin extends Component {
 		/**
 		 * Whether this pin is at the top level (i.e. i/o for the chip being edited)
 		 */
-		public isTop: boolean = false
+		public isTop: boolean = false,
+		/**
+		 * If set, group pins with this label together using said label
+		 */
+		public group?: string
 	) {
 		super({ canMove: isTop });
 		chip.pins.add(this);
@@ -50,11 +55,19 @@ export class Pin extends Component {
 	}
 
 	public override get x(): number {
-		return this.offsets().x;
+		const { left } = element.offset()!;
+		const { scrollLeft } = element[0];
+		const { x, width } = this.getBoundingClientRect();
+
+		return x - left + width / 2 + scrollLeft;
 	}
 
 	public override get y(): number {
-		return this.offsets().y;
+		const { top } = element.offset()!;
+		const { scrollTop } = element[0];
+		const { y, height } = this.getBoundingClientRect();
+
+		return y - top + height / 2 + scrollTop;
 	}
 
 	public set(state: boolean): void {
@@ -64,12 +77,10 @@ export class Pin extends Component {
 
 	public offsets() {
 		const { left, top } = element.offset()!;
+		const { scrollLeft, scrollTop } = element[0];
 		const { x, y, width, height } = this.getBoundingClientRect();
 
-		return {
-			x: x - left + width / 2,
-			y: y - top + height / 2,
-		};
+		return { x: x - left + width / 2 + scrollLeft, y: y - top + height / 2 + scrollTop };
 	}
 
 	protected updated(_: Map<PropertyKey, unknown>): void {

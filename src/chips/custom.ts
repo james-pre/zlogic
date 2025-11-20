@@ -2,8 +2,13 @@ import { List } from 'utilium';
 import { Pin } from '../pin.js';
 import type { ChipData, SubChip } from '../static.js';
 import { Chip, chips, type ChipStatic } from './chip.js';
+import { ioKinds } from './io.js';
 
 export type CustomStaticLike = ChipStatic & { data: ChipData };
+
+function __isGroup(chip: SubChip): chip is SubChip & { pinCount: number } {
+	return chip.kind == 'input_group' || chip.kind == 'output_group';
+}
 
 export class CustomChip extends Chip {
 	declare ['constructor']: CustomStaticLike;
@@ -12,9 +17,18 @@ export class CustomChip extends Chip {
 		super();
 
 		for (const chip of this.constructor.data.chips) {
-			if (chip.kind != 'input' && chip.kind != 'output') continue;
-			const pin = new Pin(this, chip.kind == 'input', false);
-			if (chip.label) pin.label = chip.label;
+			if (!ioKinds.includes(chip.kind)) continue;
+
+			if (!__isGroup(chip)) {
+				const pin = new Pin(this, chip.kind == 'input', false);
+				if (chip.label) pin.label = chip.label;
+				continue;
+			}
+
+			for (let i = 0; i < chip.pinCount; i++) {
+				const pin = new Pin(this, chip.kind == 'input_group', false, chip.label);
+				if (chip.label) pin.label = `${chip.label}[${i}]`;
+			}
 		}
 	}
 
@@ -71,9 +85,9 @@ export function chip_eval(kind: string, input_values: boolean[], _debug: boolean
 	const outputIndices = new List<number>();
 
 	for (const [i, subChip] of data.chips.entries()) {
-		if (subChip.kind === 'input') {
+		if (subChip.kind === 'input' || subChip.kind === 'inputgroup') {
 			inputIndices.add(i);
-		} else if (subChip.kind === 'output') {
+		} else if (subChip.kind === 'output' || subChip.kind === 'outputgroup') {
 			outputIndices.add(i);
 		}
 	}

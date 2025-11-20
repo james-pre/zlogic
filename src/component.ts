@@ -1,6 +1,5 @@
 import { css, LitElement, type CSSResult, type CSSResultGroup, type PropertyValues } from 'lit';
 import { property } from 'lit/decorators.js';
-import { randomID } from './utils.js';
 import $ from 'jquery';
 import { resolveConstructors } from 'utilium';
 
@@ -8,11 +7,9 @@ export type ComponentStyles = CSSResult | ComponentStyles[];
 
 export function eventPosition(event: MouseEvent): { x: number; y: number } {
 	const { left, top } = $('#editor').offset()!;
+	const { scrollLeft, scrollTop } = document.querySelector('#editor')!;
 
-	return {
-		x: event.clientX - left,
-		y: event.clientY - top,
-	};
+	return { x: event.clientX - left + scrollLeft, y: event.clientY - top + scrollTop };
 }
 
 export abstract class Component extends LitElement {
@@ -31,33 +28,21 @@ export abstract class Component extends LitElement {
 	@property() public accessor x: number = 0;
 	@property() public accessor y: number = 0;
 
-	public id: string = randomID();
+	public id: string = crypto.randomUUID();
 
 	// Moving
 
 	/**
 	 * Tracks information while moving
 	 */
-	protected move?: {
-		pastX: number;
-		pastY: number;
-		offX: number;
-		offY: number;
-		lockedAxis?: 'x' | 'y';
-	};
+	protected move?: { pastX: number; pastY: number; offX: number; offY: number; lockedAxis?: 'x' | 'y' };
 
 	/**
 	 * @internal
 	 */
 	public hasMoved: boolean = false;
 
-	public constructor(
-		protected options: {
-			canMove?: boolean;
-			autoPosition?: boolean;
-			bubbleMouse?: boolean;
-		} = {}
-	) {
+	public constructor(protected options: { canMove?: boolean; autoPosition?: boolean; bubbleMouse?: boolean } = {}) {
 		super();
 		this.classList.add('component');
 		this.addEventListener('auxclick', (e: MouseEvent) => {
@@ -71,12 +56,9 @@ export abstract class Component extends LitElement {
 			if (!this.options.bubbleMouse) event.stopPropagation();
 			if (!this.options.canMove || event.button != 0) return;
 
-			this.move = {
-				pastX: this.x,
-				pastY: this.y,
-				offX: event.clientX - this.x,
-				offY: event.clientY - this.y,
-			};
+			const editor = document.querySelector('#editor')!;
+
+			this.move = { pastX: this.x, pastY: this.y, offX: event.clientX - this.x + editor.scrollLeft, offY: event.clientY - this.y + editor.scrollTop };
 
 			this.setAttribute('dragging', '');
 		});

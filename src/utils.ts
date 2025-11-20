@@ -1,10 +1,6 @@
 import $ from 'jquery';
 import { randomInt } from 'utilium';
 
-export function randomID(): string {
-	return crypto.randomUUID();
-}
-
 const popupDialog = $<HTMLDialogElement>('#popup');
 export function popup(isPrompt: boolean, contents: string): Promise<string | undefined> {
 	const { promise, resolve, reject } = Promise.withResolvers<string | undefined>();

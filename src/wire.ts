@@ -28,10 +28,7 @@ export class WireAnchor extends Component {
 	public wires = new List<Wire>();
 
 	public constructor(x: number, y: number) {
-		super({
-			canMove: true,
-			autoPosition: true,
-		});
+		super({ canMove: true, autoPosition: true });
 
 		this.x = x;
 		this.y = y;
@@ -96,6 +93,7 @@ export class Wire extends Component {
 			position: absolute;
 			width: 100%;
 			height: 100%;
+			overflow: visible;
 		}
 
 		line {
@@ -178,13 +176,7 @@ export class Wire extends Component {
 
 			const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
 
-			$(line).attr({
-				stroke: colorState(this.input.state),
-				x1: start.x,
-				y1: start.y,
-				x2: end.x,
-				y2: end.y,
-			});
+			$(line).attr({ stroke: colorState(this.input.state), x1: start.x, y1: start.y, x2: end.x, y2: end.y });
 
 			line.addEventListener('click', event => {
 				if (event.button != 0) return;
