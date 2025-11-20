@@ -3,6 +3,7 @@
 	grid-template-columns: max-content 1fr;
 	inset: 0;
 	position: fixed;
+	width: 100%;
 }
 
 #menu {
@@ -55,7 +56,8 @@
 
 #editor-container {
 	grid-column: 2;
-	overflow: scroll;
+	inset: 0;
+	position: absolute;
 
 	.closed {
 		text-align: center;

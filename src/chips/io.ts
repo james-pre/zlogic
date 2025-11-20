@@ -139,7 +139,7 @@ export abstract class IOGroup extends Chip<{ pinCount: number }> {
 		ioStyle('.pin'),
 		css`
 			:host {
-				width: 4em;
+				width: 8em;
 			}
 
 			.pins {
@@ -196,7 +196,7 @@ export abstract class IOGroup extends Chip<{ pinCount: number }> {
 			}
 
 			.display.input {
-				right: 100%;
+				left: 0;
 
 				.line.horizontal {
 					left: 0.5em;
@@ -208,7 +208,7 @@ export abstract class IOGroup extends Chip<{ pinCount: number }> {
 			}
 
 			.display.output {
-				left: 100%;
+				right: 0;
 
 				.line.horizontal {
 					right: 0.5em;
