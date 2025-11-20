@@ -29,4 +29,4 @@ $(document.body).on('keydown', e => {
 	}
 });
 
-Object.assign(globalThis, { project, editor });
+Object.assign(globalThis, { project, editor, jquery: $ });
