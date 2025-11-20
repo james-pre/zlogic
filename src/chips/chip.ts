@@ -51,7 +51,7 @@ export abstract class Chip<Config = unknown> extends Component {
 		}
 	}
 
-	public setup?(config?: Config): unknown;
+	public setup?(config?: Config): void | Promise<void>;
 
 	public remove(): void {
 		super.remove();
@@ -70,10 +70,7 @@ export abstract class Chip<Config = unknown> extends Component {
 	}
 
 	public toJSON(): SubChip {
-		const data: SubChip = {
-			...pick(this, 'x', 'y'),
-			kind: this.constructor.id,
-		};
+		const data: SubChip = { ...pick(this, 'x', 'y'), kind: this.constructor.id };
 
 		if ('label' in this && this.label) data.label = this.label;
 		return data;

@@ -37,7 +37,7 @@ export const chips = new List<Chip>(),
 	wires = new List<Wire>(),
 	anchors = new List<WireAnchor>();
 
-export async function addChip(id: string): Promise<Chip> {
+export function addChip(id: string): Chip {
 	const ChipCtor = chipConstructors.get(id);
 	if (!ChipCtor) {
 		throw 'Component does not exist';
@@ -47,7 +47,6 @@ export async function addChip(id: string): Promise<Chip> {
 	}
 
 	const subChip = new ChipCtor();
-	if (subChip.setup) await subChip.setup();
 	subChip.addEventListener('remove', () => chips.delete(subChip));
 	chips.add(subChip);
 	element.append(subChip);
@@ -58,12 +57,19 @@ export function inputs(): Input[] {
 	return chips.toArray().filter(chip => chip instanceof Input);
 }
 
-toolbar.find<HTMLSelectElement>('select.add').on('change', e => {
-	if (!e.target.value) return;
+// eslint-disable-next-line @typescript-eslint/no-misused-promises
+toolbar.find<HTMLSelectElement>('select.add').on('change', async event => {
+	if (!event.target.value) return;
 
-	void addChip(e.target.value)
-		.then(() => (e.target.value = ''))
-		.catch(showError);
+	const chip = addChip(event.target.value);
+	if (chip.setup) {
+		try {
+			await chip.setup();
+		} catch (error) {
+			showError(error);
+		}
+	}
+	event.target.value = '';
 });
 
 export function connectWire(this: Pin, event: MouseEvent) {
@@ -118,8 +124,8 @@ export async function load(data: ChipData): Promise<void> {
 	toolbar.find('input.color').val(data.color);
 
 	for (const { kind, x, y, label, ...rest } of data.chips) {
-		const chip = await addChip(kind);
-		chip.setup?.(rest);
+		const chip = addChip(kind);
+		await chip.setup?.(rest);
 		Object.assign(chip, { x, y, label });
 	}
 
