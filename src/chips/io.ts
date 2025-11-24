@@ -3,7 +3,7 @@
 import { css, html, unsafeCSS, type TemplateResult } from 'lit';
 import { Pin } from '../pin.js';
 import type { SubChip } from '../static.js';
-import { colorState, popup, splitBin } from '../utils.js';
+import { colorState, joinBin, popup, splitBin } from '../utils.js';
 import { Chip, register } from './chip.js';
 
 const ioStyle = (selector: string) =>
@@ -246,13 +246,7 @@ export abstract class IOGroup extends Chip<{ pinCount: number }> {
 	}
 
 	get value(): number {
-		return parseInt(
-			this.pins
-				.toArray()
-				.map(pin => (pin.state ? '1' : '0'))
-				.join(''),
-			2
-		);
+		return joinBin(this.pins.toArray().map(pin => pin.state));
 	}
 
 	set value(v: number) {
