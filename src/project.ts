@@ -1,10 +1,10 @@
 import $ from 'jquery';
 import { download, upload } from 'utilium/dom.js';
-import { chips, register } from './chips/chip.js';
+import { chips, register } from './components/chip.js';
 import * as editor from './editor.js';
 import { version, type ChipData, type ChipFile, type ProjectFile } from './static.js';
 import { popup, showError } from './utils.js';
-import { chip_compile, chip_link, CustomChip, type ChipEval } from './chips/custom.js';
+import { chip_compile, chip_link, CustomChip, type ChipEval } from './components/custom.js';
 import { pick } from 'utilium';
 
 let currentProject: ProjectFile | null;

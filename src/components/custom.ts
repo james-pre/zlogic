@@ -1,5 +1,5 @@
 import { List } from 'utilium';
-import { Pin } from '../pin.js';
+import { Pin } from './pin.js';
 import type { ChipData, SubChip } from '../static.js';
 import { Chip, chips, type ChipStatic } from './chip.js';
 import { ioKinds } from './io.js';

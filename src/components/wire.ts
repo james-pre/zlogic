@@ -2,9 +2,9 @@ import $ from 'jquery';
 import { css, html, type PropertyValues } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { List } from 'utilium';
-import { Component, eventPosition } from './component.js';
+import { Component, eventPosition } from '../component.js';
 import type { Pin } from './pin.js';
-import { colorState } from './utils.js';
+import { colorState } from '../utils.js';
 
 @customElement('sim-anchor')
 export class WireAnchor extends Component {

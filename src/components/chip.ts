@@ -2,7 +2,7 @@ import $ from 'jquery';
 import { css, html } from 'lit';
 import { List, pick } from 'utilium';
 import { Component } from '../component.js';
-import type { Pin } from '../pin.js';
+import type { Pin } from './pin.js';
 import { chipHeightScaling, type SubChip } from '../static.js';
 import { randomColor } from '../utils.js';
 

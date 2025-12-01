@@ -1,7 +1,7 @@
 /* Built-in I/O "chips" */
 
 import { css, html, unsafeCSS, type TemplateResult } from 'lit';
-import { Pin } from '../pin.js';
+import { Pin } from './pin.js';
 import type { SubChip } from '../static.js';
 import { colorState, joinBin, popup, splitBin } from '../utils.js';
 import { Chip, register } from './chip.js';

@@ -1,13 +1,13 @@
 import $ from 'jquery';
 import { List } from 'utilium';
 import { download } from 'utilium/dom.js';
-import { Chip, chips as chipConstructors } from './chips/chip.js';
-import { Input } from './chips/index.js'; // Need side-effects
+import { Chip, chips as chipConstructors } from './components/chip.js';
+import { Input } from './components/index.js'; // Need side-effects
 import { eventPosition } from './component.js';
-import type { Pin } from './pin.js';
+import type { Pin } from './components/pin.js';
 import type { ChipData, ChipFile, EditorState } from './static.js';
 import { randomColor, showError } from './utils.js';
-import { Wire, WireAnchor, addPendingWire, pendingWire, removePendingWire } from './wire.js';
+import { Wire, WireAnchor, addPendingWire, pendingWire, removePendingWire } from './components/wire.js';
 
 export const element = $('#editor'),
 	toolbar = $('#toolbar');

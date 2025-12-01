@@ -1,12 +1,11 @@
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import type { Chip } from './chips/chip.js';
-import { Component } from './component.js';
-import { connectWire, element } from './editor.js';
+import { Component } from '../component.js';
+import { connectWire, element } from '../editor.js';
+import { chipHeightScaling } from '../static.js';
+import { colorState } from '../utils.js';
 import type { Wire } from './wire.js';
-import { colorState } from './utils.js';
-import { chipHeightScaling } from './static.js';
-import $ from 'jquery';
+import type { Chip } from './chip.js';
 
 @customElement('sim-pin')
 export class Pin extends Component {

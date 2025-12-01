@@ -1,7 +1,7 @@
 /* Built-in logic gates */
 
 import { Chip, register } from './chip.js';
-import { Pin } from '../pin.js';
+import { Pin } from './pin.js';
 
 /**
  * Helper class since most of the built-in logic gates have two inputs and one output
