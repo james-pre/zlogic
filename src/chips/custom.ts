@@ -249,6 +249,7 @@ export function chip_compile(chip: ChipData | ChipStatic, minify: boolean = fals
 		// Generate function call for each sub-chip based on its inputs
 		const inputs = data.wires
 			.filter(wire => wire.to[0] == i)
+			.sort((a, b) => a.to[1] - b.to[1])
 			.map(({ from: [chipNo, pinNo] }) => {
 				const binding = bindings.get(chipNo);
 				if (!binding?.startsWith('$in')) return `${binding}[${pinNo}]`;
