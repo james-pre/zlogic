@@ -2,8 +2,9 @@
 	"compilerOptions": {
 		"module": "NodeNext",
 		"target": "ES2020",
+		"rootDir": "src",
 		"outDir": "dist",
-		"lib": ["ESNext", "ESNext.Disposable", "DOM"],
+		"lib": ["ESNext", "DOM"],
 		"moduleResolution": "NodeNext",
 		"declaration": true,
 		"strict": true
